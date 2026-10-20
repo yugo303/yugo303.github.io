@@ -1,6 +1,6 @@
 # yugo303.github.io
 
-ゆうごのポートフォリオ（GitHub Pages）。
+yugo303 のポートフォリオ（GitHub Pages）。
 
 - `/` 作ったものの一覧
 - `/photospot/` フォトスポット（仮称）の紹介と制作の記録

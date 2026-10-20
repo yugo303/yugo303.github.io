@@ -7,14 +7,14 @@
 <meta name="description" content="地形と地図のデータから景色のいい場所を見つけ、スマホでの撮り方まで教えるアプリ。狙い・仕組み・画面・制作の記録。">
 <meta name="robots" content="noindex">
 <meta property="og:type" content="website">
-<meta property="og:title" content="フォトスポット 制作ポートフォリオ">
-<meta property="og:description" content="作例がなくても、いい景色は地形から見つかる。地形データから撮影スポットを見つけるアプリの制作記録です。">
+<meta property="og:title" content="フォトスポット（仮称） 制作ポートフォリオ">
+<meta property="og:description" content="地形と地図のデータから景色のいい場所を見つけ、スマホでの撮り方まで教えるアプリの制作記録です。">
 <meta property="og:url" content="https://yugo303.github.io/photospot/">
 <meta property="og:image" content="https://yugo303.github.io/photospot/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
 /* Layout: 1本の縦長ケーススタディ。冒頭は実データの「360度の見通し」図、あとは章ごとに 2 カラム（見出し｜本文）→ スマホでは 1 カラム */
 :root {
@@ -28,18 +28,18 @@
   --sea: #1C6FB8;
   --t-coast: #1C7ED6; --t-inland: #7048E8; --t-sakura: #F06595; --t-koyo: #E8590C;
   --t-flower: #D6336C; --t-forest: #2F9E44; --t-mystic: #AE3EC9;
-  --f-display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-display: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
   --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0F1419; --panel: #171E26; --ink: #E8EDF2; --muted: #93A1AF; --line: #27323D;
+    --paper: #12181F; --panel: #1C252F; --ink: #F1F4F7; --muted: #BAC5D0; --line: #374452;
     --sun: #FF8E42; --sun-soft: rgba(255, 142, 66, 0.16); --sea: #5AA6E8; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #0F1419; --panel: #171E26; --ink: #E8EDF2; --muted: #93A1AF; --line: #27323D;
+  --paper: #12181F; --panel: #1C252F; --ink: #F1F4F7; --muted: #BAC5D0; --line: #374452;
   --sun: #FF8E42; --sun-soft: rgba(255, 142, 66, 0.16); --sea: #5AA6E8; color-scheme: dark;
 }
 
@@ -64,14 +64,15 @@ a { color: var(--sea); }
 /* 上部バー */
 .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
   padding-block: 20px; border-bottom: 1px solid var(--line); font-size: 14px; }
-.brand { font-family: var(--f-display); font-size: 18px; letter-spacing: 0.02em; }
+.brand { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+.brand:hover { text-decoration: underline; }
 .status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
 .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sun); }
 
 /* ヒーロー */
 .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 56px 48px; }
-.hero h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 5.4vw, 60px); line-height: 1.28; letter-spacing: 0.01em; }
-.hero h1 em { font-style: normal; color: var(--sun); }
+.hero h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 4.6vw, 48px); line-height: 1.35; letter-spacing: 0.02em; }
+.hero h1 small { font-size: 0.42em; font-weight: 500; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
 .lead { margin-top: 22px; font-size: 17px; color: var(--muted); max-width: 34em; }
 .facts { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; }
 .fact { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; background: var(--panel); }
@@ -93,7 +94,7 @@ a { color: var(--sea); }
 }
 
 /* 章 */
-section.chapter { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-block: 56px; border-top: 1px solid var(--line); }
+section.chapter { scroll-margin-top: 16px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-block: 56px; border-top: 1px solid var(--line); }
 .chapter > header { display: grid; gap: 8px; align-content: start; }
 .chapter h2 { font-size: 26px; font-weight: 700; line-height: 1.4; }
 .body { display: grid; gap: 24px; min-width: 0; }
@@ -191,12 +192,23 @@ footer .who { font-size: 15px; color: var(--ink); }
 .decisions dt { font-weight: 700; font-size: 15px; }
 .decisions dd { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75; }
 
+/* 目次 */
+.toc { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 18px 22px; display: grid; gap: 10px; margin-bottom: 48px; scroll-margin-top: 16px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); grid-auto-flow: column; gap: 4px 32px; }
+.toc a { display: grid; grid-template-columns: 2.4em minmax(0, 1fr); padding-block: 6px; color: var(--ink); text-decoration: none; font-size: 15px; border-bottom: 1px solid var(--line); }
+.toc a span { font-family: var(--f-mono); color: var(--sun); font-size: 13px; padding-top: 2px; }
+.toc a:hover { color: var(--sun); }
+.back { font-size: 13px; color: var(--muted); text-decoration: none; margin-top: 4px; }
+.back:hover { color: var(--sun); text-decoration: underline; }
+
 a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
 @media (max-width: 860px) {
   .hero { grid-template-columns: minmax(0, 1fr); padding-block: 36px 32px; gap: 28px; }
+  .back { display: none; }
   section.chapter { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 40px; }
-  .market, .pillars { grid-template-columns: minmax(0, 1fr); }
+  .market, .pillars, .toc ol { grid-template-columns: minmax(0, 1fr); }
+  .toc ol { grid-template-rows: none; grid-auto-flow: row; }
   .phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .features, .stack, .next, .fixes, .roles { grid-template-columns: minmax(0, 1fr); }
   .decisions div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
@@ -213,15 +225,15 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 <body>
 <div class="wrap">
   <div class="top">
-    <span class="brand">フォトスポット<span class="muted" style="font-family: var(--f-body); font-size: 13px; margin-left: 6px;">（仮称）</span></span>
+    <a class="brand" href="https://yugo303.github.io/">yugo303 ポートフォリオ</a>
     <span class="status">Android 版を 2026年11月に公開予定</span>
   </div>
 
   <header class="hero">
     <div>
       <p class="label">個人開発 / スマホアプリ / 2026年10月〜</p>
-      <h1 style="margin-top: 14px;">作例がなくても、<br><em>いい景色</em>は<br>地形から見つかる。</h1>
-      <p class="lead">地形と地図のデータから「景色がいい場所」を自動で見つけ、どこに立ち、どちらを向き、いつ撮ればいいかまでスマホで教えるアプリです。誰かが撮った写真に頼らないので、住宅地や郊外でも提案が尽きません。</p>
+      <h1 style="margin-top: 14px;">フォトスポット<small>（仮称）</small></h1>
+      <p class="lead">地形と地図のデータから「景色がいい場所」を自動で見つけ、どこに立ち、どちらを向き、いつ撮ればいいかまでスマホで教えるアプリです。誰かが撮った写真に頼らないので、住宅地や郊外でも撮りに行ける場所を提案できます。</p>
       <div class="facts">
         <span class="fact">東京・神奈川・千葉 <b>7,481</b> か所</span>
         <span class="fact">無料・広告なし・ログイン不要</span>
@@ -256,51 +268,69 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
     </figure>
   </header>
 
+  <nav class="toc" id="toc" aria-label="目次">
+    <span class="label">目次</span>
+    <ol>
+      <li><a href="#market"><span>01</span>既存のアプリで足りなかったこと</a></li>
+      <li><a href="#approach"><span>02</span>3つの方針</a></li>
+      <li><a href="#how"><span>03</span>スポットを見つける仕組み</a></li>
+      <li><a href="#craft"><span>04</span>工夫したところ</a></li>
+      <li><a href="#screens"><span>05</span>主な画面</a></li>
+      <li><a href="#features"><span>06</span>初版の機能</a></li>
+      <li><a href="#tech"><span>07</span>技術と構成</a></li>
+      <li><a href="#process"><span>08</span>開発の進め方</a></li>
+      <li><a href="#log"><span>09</span>制作の記録</a></li>
+      <li><a href="#next"><span>10</span>これから</a></li>
+    </ol>
+  </nav>
+
   <section class="chapter" id="market">
     <header>
-      <span class="label">01 / 見つけた空白</span>
-      <h2>撮影地アプリは、日本とスマホの人に向いていなかった</h2>
+      <span class="label">01</span>
+      <h2>既存のアプリで足りなかったこと</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
-      <p>作り始める前に、国内外のフォトスポット系アプリを15以上調べました。</p>
+      <p>作り始める前に、国内外のフォトスポット系のアプリやサービスを15以上調べました。</p>
       <div class="market">
         <div>
           <h3>海外のアプリ</h3>
-          <p>Locationscout、PhotoPills など。カメラ愛好家向けのサブスク（年 数千〜1万円台）が中心で、日本のスポットは少なめ。</p>
+          <p>Locationscout や PhotoPills など。カメラ愛好家向けのサブスク（年に数千円〜1万円台）が中心で、日本のスポットは多くありません。</p>
         </div>
         <div>
           <h3>国内のアプリ</h3>
-          <p>エビフォト、SNAPLACE、Prism Japan など。2016〜2022年に出たものの、いまも勢いのある専用アプリは見つかりませんでした。</p>
+          <p>エビフォト、SNAPLACE、Prism Japan など。2016〜2022年に出たものはありますが、いまも広く使われている専用アプリは見つかりませんでした。</p>
         </div>
         <div>
           <h3>Google マップと Instagram</h3>
-          <p>「場所を保存して地図に出す」ことは無料でできる。ただし、どこからどう撮るかまでは教えてくれません。</p>
+          <p>場所を保存して地図に出すことは無料でできます。ただ、どこからどう撮ればいいかまでは教えてくれません。</p>
         </div>
       </div>
-      <p class="gap-note">どのサービスも「誰かが撮った写真」が出発点です。写真が投稿されていない場所は、どれだけ眺めがよくても地図に出てきません。</p>
+      <p class="gap-note">どのサービスも「誰かが撮った写真」が出発点です。そのため、写真が投稿されていない場所は、眺めがよくても地図に出てきません。</p>
     </div>
   </section>
 
   <section class="chapter" id="approach">
     <header>
-      <span class="label">02 / 差別化</span>
+      <span class="label">02</span>
       <h2>3つの方針</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <div class="pillars">
         <div class="pillar">
           <h3>写真がなくても、地形から見つける</h3>
           <p>標高・建物・道・樹木・水辺のデータから、眺め・桜・森の小道など7つのテーマで候補を自動で出します。選ばれた理由も「西が開けていて夕日向き」のように文章で示します。</p>
-          <p class="vs">他のアプリ: 投稿された作例が頼り</p>
+          <p class="vs">他のアプリ: 投稿された写真が頼り</p>
         </div>
         <div class="pillar">
           <h3>スマホでの撮り方まで教える</h3>
-          <p>撮る方角をコンパスで、日の入りの時刻と方角を計算で、ズームの倍率や水平線の位置を一言で。前に「当たり」を付けた写真を重ねて同じ構図でも撮れます。</p>
+          <p>撮る方角をコンパスで示し、日の入りの時刻と方角を計算し、ズームの倍率や水平線の位置を一言で伝えます。前にうまく撮れた写真を重ねて、同じ構図で撮ることもできます。</p>
           <p class="vs">他のアプリ: 光の計画は上級者向けの有料機能</p>
         </div>
         <div class="pillar">
           <h3>無料で、すぐ使える</h3>
-          <p>ログインなし・広告なし。スポットはアプリに入っていて、電波の弱い山や海辺でも探せます。常時動くサーバーを持たない作りで、運営費を年2〜3万円に抑えます。</p>
+          <p>ログインも広告もありません。スポットのデータはアプリに入っているので、電波の弱い山や海辺でも探せます。常に動くサーバーを持たない作りにして、運営費を年2〜3万円に抑えます。</p>
           <p class="vs">他のアプリ: 無料版は制限が多い</p>
         </div>
       </div>
@@ -309,35 +339,36 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
   <section class="chapter" id="how">
     <header>
-      <span class="label">03 / 仕組み</span>
-      <h2>スポットを自動で見つける流れ</h2>
+      <span class="label">03</span>
+      <h2>スポットを見つける仕組み</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <ol class="steps">
-        <li><div><b>歩ける道に点を置く</b><span>生活道路・遊歩道・階段・山道に約60m間隔で候補地点を置く。高速道路・私道・立入禁止は除く。</span></div></li>
-        <li><div><b>地表の形をつくる</b><span>地面の標高に、建物の高さ（なければ戸建7m・集合住宅12mと推定）と森（12m）を重ねる。</span></div></li>
-        <li><div><b>360度の見通しを計算する</b><span>各地点から全方角の見上げ角を求め、遠くまで見渡せる面積、水面の量、富士山やスカイツリーが見える方角を出す。</span></div></li>
-        <li><div><b>テーマごとに点数をつける</b><span>眺めは見通しと高低差、桜・紅葉・花は周囲の樹木の量、森の小道や神秘的な場所は森の割合や社寺・滝・巨木で評価する。</span></div></li>
-        <li><div><b>都県ごとのファイルにしてアプリに入れる</b><span>重なる地点をまとめ、市区町村ごとの偏りをならしてから書き出す。地図の絞り込みや日の出・日の入りの計算は端末で行う。</span></div></li>
+        <li><div><b>歩ける道に点を置く</b><span>生活道路・遊歩道・階段・山道に、約60m間隔で候補地点を置きます。高速道路・私道・立入禁止の道は除きます。</span></div></li>
+        <li><div><b>地表の形をつくる</b><span>地面の標高に、建物の高さ（不明なら戸建7m・集合住宅12mと推定）と森（12m）を重ねます。</span></div></li>
+        <li><div><b>360度の見通しを計算する</b><span>各地点から全方角の見上げ角を求め、遠くまで見渡せる面積、水面の量、富士山やスカイツリーが見える方角を出します。</span></div></li>
+        <li><div><b>テーマごとに点数をつける</b><span>眺めは見通しと高低差、桜・紅葉・花は周りの樹木の量、森の小道や神秘的な場所は森の割合や社寺・滝・巨木で評価します。</span></div></li>
+        <li><div><b>都県ごとのファイルにしてアプリに入れる</b><span>重なる地点をまとめ、地域の偏りをならしてから書き出します。地図での絞り込みや日の出・日の入りの計算は端末で行います。</span></div></li>
       </ol>
 
       <div class="stats">
         <div class="stat">
           <span class="num">7,481<small>か所</small></span>
-          <p>東京 1,665・神奈川 2,180・千葉 3,636。うち 1,234 か所が名所クラス、残りは「近所のおすすめ」。</p>
+          <p>東京 1,665・神奈川 2,180・千葉 3,636。うち 1,234 か所が名所クラスで、残りは「近所のおすすめ」です。</p>
         </div>
         <div class="stat">
           <span class="num">37%<small>vs 10%</small></span>
-          <p>地図上の既存の展望スポット245件のうち、点数の上位10%に入った割合。ランダムなら10%。</p>
+          <p>地図データにある展望スポット245件のうち、点数の上位10%に入った割合です。ランダムなら10%になります。</p>
         </div>
         <div class="stat">
           <span class="num">28<small>/ 50</small></span>
-          <p>手で選んだ有名撮影地50か所のうち、300m以内にスポットがあった数。ランダムに置くと11か所。</p>
+          <p>有名な撮影地50か所のうち、300m以内にスポットがあった数です。ランダムに置いた場合は11か所でした。</p>
         </div>
       </div>
 
       <div class="bars" aria-label="テーマ別のスポット数">
-        <p class="label">テーマ別のスポット数（1か所が複数テーマに入ることがあります）</p>
+        <p class="label">テーマ別のスポット数（1か所が複数のテーマに入ることがあります）</p>
         <div class="bar"><span>内陸の眺め</span><div class="track"><div class="fill" style="width: 100%; background: var(--t-inland)"></div></div><span class="n">3,514</span></div>
         <div class="bar"><span>森の小道</span><div class="track"><div class="fill" style="width: 67.5%; background: var(--t-forest)"></div></div><span class="n">2,371</span></div>
         <div class="bar"><span>海・港の眺め</span><div class="track"><div class="fill" style="width: 24.7%; background: var(--t-coast)"></div></div><span class="n">869</span></div>
@@ -346,46 +377,47 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
         <div class="bar"><span>紅葉・黄葉</span><div class="track"><div class="fill" style="width: 5.1%; background: var(--t-koyo)"></div></div><span class="n">178</span></div>
         <div class="bar"><span>花</span><div class="track"><div class="fill" style="width: 4.5%; background: var(--t-flower)"></div></div><span class="n">159</span></div>
       </div>
-      <p class="note">最初の試作（横浜市と都内南部4区）は、上位の候補を自分でひとつずつストリートビューで確かめ、方向性が合っていることを確認してから広げました。</p>
+      <p class="note">最初の試作（横浜市と都内南部4区）では、上位の候補を自分でひとつずつストリートビューで確かめ、方向性が合っていることを確認してから範囲を広げました。</p>
     </div>
   </section>
 
   <section class="chapter" id="craft">
     <header>
-      <span class="label">04 / 工夫したところ</span>
-      <h2>精度と速さのために直したこと</h2>
+      <span class="label">04</span>
+      <h2>工夫したところ</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <div class="fixes">
         <div class="fix">
           <h3>海沿いばかりが上位に来る</h3>
-          <p><b>課題</b><span>最初の採点では、見通しのよい海沿いが上位をほぼ独占し、内陸の眺めや桜の名所が埋もれた。</span></p>
-          <p class="fix-a"><b>対応</b><span>採点を7つのテーマに分け、テーマごとに上位を選ぶ方式に変更。眺めは「海・港」と「内陸」に分けた。</span></p>
+          <p><b>課題</b><span>最初の採点では、見通しのよい海沿いが上位をほとんど占め、内陸の眺めや桜の名所が埋もれていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>採点を7つのテーマに分け、テーマごとに上位を選ぶようにしました。眺めも「海・港」と「内陸」に分けています。</span></p>
         </div>
         <div class="fix">
           <h3>川沿いの低地が「海」になる</h3>
-          <p><b>課題</b><span>千葉県では、標高 0.5m 以下を海とみなす判定のせいで、利根川や手賀沼のまわりが海の眺めとして選ばれた。</span></p>
-          <p class="fix-a"><b>対応</b><span>海の判定を標高ではなく、海岸線のポリゴンとの重なりで行うように変更。</span></p>
+          <p><b>課題</b><span>千葉県では、標高 0.5m 以下を海とみなしていたため、利根川や手賀沼のまわりが海の眺めとして選ばれていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>海かどうかを標高ではなく、海の範囲を表す地図データとの重なりで判定するようにしました。</span></p>
         </div>
         <div class="fix">
           <h3>都心や湾岸に偏る</h3>
-          <p><b>課題</b><span>富士山とスカイツリーが両方見える湾岸の地点が並び、太平洋側や郊外のスポットが押し出された。</span></p>
-          <p class="fix-a"><b>対応</b><span>市区町村ごとに名所クラスの上限（15%）、眺めのテーマは 5km 四方に3か所までに制限。</span></p>
+          <p><b>課題</b><span>富士山とスカイツリーが両方見える湾岸の地点ばかりが並び、太平洋側や郊外のスポットが押し出されていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>市区町村ごとに名所クラスの上限（15%）を設け、眺めのテーマは 5km 四方に3か所までにしました。</span></p>
         </div>
         <div class="fix">
           <h3>都県まるごとの計算が重い</h3>
-          <p><b>課題</b><span>建物と標高のデータが大きく、東京・神奈川を一度に見通し計算するとメモリも時間も足りない。</span></p>
-          <p class="fix-a"><b>対応</b><span>地域を 16 の区画に分け、のりしろを付けて区画ごとに計算してから都県単位でまとめ直す流れにした。</span></p>
+          <p><b>課題</b><span>建物と標高のデータが大きく、東京・神奈川を一度に計算するとメモリも時間も足りませんでした。</span></p>
+          <p class="fix-a"><b>対応</b><span>地域を16の区画に分け、境目に重なりを持たせて区画ごとに計算し、最後に都県単位でまとめ直す流れにしました。</span></p>
         </div>
         <div class="fix">
           <h3>データを作り直すと記録が消える</h3>
-          <p><b>課題</b><span>スポットを計算し直すと ID が変わり、保存した「行きたい場所」や撮影の記録が迷子になる。</span></p>
-          <p class="fix-a"><b>対応</b><span>新旧のスポットが 50m 以内なら同じ ID を引き継ぐようにした。</span></p>
+          <p><b>課題</b><span>スポットを計算し直すと ID が変わり、保存した「行きたい場所」や撮影の記録とのつながりが切れてしまいます。</span></p>
+          <p class="fix-a"><b>対応</b><span>新しいスポットが古いスポットから 50m 以内なら、同じ ID を引き継ぐようにしました。</span></p>
         </div>
         <div class="fix">
           <h3>「梅」が花の名所になる</h3>
-          <p><b>課題</b><span>道路名に「梅」が入るだけで花のテーマに入ったり、工業地帯や埋立地が眺めのよい場所に入ったりした。</span></p>
-          <p class="fix-a"><b>対応</b><span>名前の判定を見直し、工業地・埋立地を眺めのテーマから除外。</span></p>
+          <p><b>課題</b><span>道路の名前に「梅」が入るだけで花のテーマに入ったり、工業地帯や埋立地が眺めのよい場所に入ったりしていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>名前での判定を見直し、工業地と埋立地を眺めのテーマから外しました。</span></p>
         </div>
       </div>
     </div>
@@ -393,64 +425,66 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
   <section class="chapter" id="screens">
     <header>
-      <span class="label">05 / 画面</span>
-      <h2>探す、行く、撮る</h2>
+      <span class="label">05</span>
+      <h2>主な画面</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <div class="phones">
         <figure class="phone">
           <div class="frame"><img src="img/map.webp" alt="地図にテーマ別のピンが並び、選んだスポットのカードが下に出ている画面"></div>
-          <figcaption><b>地図</b><span>ピンの色と形でテーマがわかる。タップで名前と距離のカード。</span></figcaption>
+          <figcaption><b>地図</b><span>ピンの色と形でテーマがわかります。タップすると名前と距離のカードが出ます。</span></figcaption>
         </figure>
         <figure class="phone">
           <div class="frame"><img src="img/suggest.webp" alt="近くのおすすめスポットを、選ばれた理由と見通し図つきで表示する画面"></div>
-          <figcaption><b>近くのおすすめ</b><span>範囲とテーマを選ぶと、理由と見通し図つきで1か所ずつ出る。</span></figcaption>
+          <figcaption><b>近くのおすすめ</b><span>範囲とテーマを選ぶと、理由と見通し図つきで1か所ずつ出ます。</span></figcaption>
         </figure>
         <figure class="phone">
           <div class="frame"><img src="img/detail.webp" alt="スポット詳細。標高、開けた方角、日の入り時刻、選ばれた理由の一覧"></div>
-          <figcaption><b>スポット詳細</b><span>標高・開けた方角・今日の日の入りと、選ばれた理由の一覧。</span></figcaption>
+          <figcaption><b>スポット詳細</b><span>標高、開けた方角、今日の日の入りと、選ばれた理由の一覧です。</span></figcaption>
         </figure>
         <figure class="phone">
           <div class="frame"><img src="img/navigate.webp" alt="スポットの方角を大きな矢印と距離で示す案内画面"></div>
-          <figcaption><b>ここへ行く</b><span>矢印と距離だけのシンプルな案内。地図での案内にも切り替えられる。</span></figcaption>
+          <figcaption><b>ここへ行く</b><span>矢印と距離だけのシンプルな案内です。地図での案内にも切り替えられます。</span></figcaption>
         </figure>
         <figure class="phone">
           <div class="frame"><img src="img/guide.webp" alt="構図ガイド。撮る方角のコンパス、日の出と日の入り、画角のアドバイス"></div>
-          <figcaption><b>構図ガイド</b><span>撮る方角、時間帯、ズームの倍率。撮ったら「当たり・微妙・外れ」を記録。</span></figcaption>
+          <figcaption><b>構図ガイド</b><span>撮る方角、時間帯、ズームの倍率を示します。撮ったら「当たり・微妙・外れ」を記録できます。</span></figcaption>
         </figure>
         <figure class="phone">
           <div class="frame"><img src="img/stats.webp" alt="行った場所や撮影の数と、獲得したバッジの一覧"></div>
-          <figcaption><b>記録とバッジ</b><span>行った場所やエリアの数に応じて20種類のバッジ。</span></figcaption>
+          <figcaption><b>記録とバッジ</b><span>行った場所やエリアの数に応じて、20種類のバッジがもらえます。</span></figcaption>
         </figure>
       </div>
 
       <figure class="wide">
         <div class="scroll"><img src="img/search.webp" alt="「エモい場所」「ちるできるとこ」「映える花」「穴場」「やばい景色」で検索した結果の画面5枚"></div>
-        <figcaption>言葉のニュアンスで探せる。「エモい場所」「ちるできるとこ」「穴場」などを、夕日・水辺・森といった条件に読み替えて絞り込みます。</figcaption>
+        <figcaption>言葉のニュアンスでも探せます。「エモい場所」「ちるできるとこ」「穴場」などを、夕日・水辺・森といった条件に読み替えて絞り込みます。</figcaption>
       </figure>
       <figure class="wide">
-        <div class="scroll"><img src="img/tips.webp" alt="桜並木、水平線、鳥居、森の小道のテーマ別の構図の図と撮り方のコツ"></div>
-        <figcaption>テーマ別の撮り方。構図の図、撮りどきの時期と光、3つのコツと注意点をセットで出します。</figcaption>
+        <div class="scroll"><img src="img/tips.webp" alt="桜並木、水平線、鳥居、森の小道のテーマ別の構図の図と撮り方のコツ" ></div>
+        <figcaption>テーマ別の撮り方です。構図の図、撮りどきの時期と光、3つのコツと注意点をまとめて出します。</figcaption>
       </figure>
       <figure class="wide">
         <div class="scroll"><img src="img/onboarding.webp" alt="初回起動時の質問。撮影に慣れているか、どんな写真を撮りたいかを選ぶ"></div>
-        <figcaption>最初の質問で、撮影に慣れているかと好みのテーマを聞き、手助けの量とおすすめの並びを変えます。</figcaption>
+        <figcaption>最初の起動時に、撮影に慣れているかと好みのテーマを聞き、手助けの量とおすすめの並び順を変えます。</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="chapter" id="features">
     <header>
-      <span class="label">06 / 機能</span>
-      <h2>初版に入っているもの</h2>
+      <span class="label">06</span>
+      <h2>初版の機能</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <ul class="features">
-        <li>テーマ・言葉で探す<span>7テーマの絞り込みと、言葉のニュアンス検索・検索履歴</span></li>
+        <li>テーマ・言葉で探す<span>7テーマの絞り込み、言葉のニュアンス検索、検索履歴</span></li>
         <li>選ばれた理由と360度の見通し<span>見える距離、水面、ランドマークの方角</span></li>
         <li>構図ガイドとカメラ<span>コンパス、日の出・日の入り、補助線、前の写真の重ね表示</span></li>
-        <li>撮りどきの通知<span>行きたい場所のゴールデンアワー・マジックアワーを知らせる</span></li>
-        <li>7日間の天気<span>撮影地点の予報と正確な日の出・日の入り時刻</span></li>
+        <li>撮りどきの通知<span>行きたい場所のゴールデンアワー・マジックアワーのお知らせ</span></li>
+        <li>7日間の天気<span>撮影地点の予報と、正確な日の出・日の入りの時刻</span></li>
         <li>行きたい場所のリストとメモ<span>リスト分け、自分用の撮影地点の調整</span></li>
         <li>写真の保存と共有<span>写真アプリへの保存、LINE・Instagram などへの共有</span></li>
         <li>記録の書き出し<span>機種変更のときに記録と写真をまとめて移せる</span></li>
@@ -462,23 +496,24 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
   <section class="chapter" id="tech">
     <header>
-      <span class="label">07 / 技術</span>
-      <h2>サーバーを持たない作り</h2>
+      <span class="label">07</span>
+      <h2>技術と構成</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
-      <p>スポットの計算は事前にまとめて行い、結果を都県ごとのファイルとしてアプリに入れています。利用者が増えても費用が増えず、オフラインでも動きます。</p>
+      <p>スポットの計算は前もってまとめて行い、結果を都県ごとのファイルとしてアプリに入れています。サーバーを持たないので、利用者が増えても費用が増えず、オフラインでも動きます。</p>
       <div class="stack">
         <dl>
           <dt>アプリ</dt>
-          <dd><code>React Native</code> + <code>Expo SDK 57</code>、画面遷移は <code>expo-router</code>。iOS・Android を1つのコードで。ビルドは EAS。</dd>
+          <dd><code>React Native</code> と <code>Expo SDK 57</code> で、iOS と Android を1つのコードで作っています。画面遷移は <code>expo-router</code>、ビルドは EAS です。</dd>
           <dt>地図</dt>
-          <dd><code>MapLibre</code> に OpenFreeMap の地図。夜用の配色は自作。ピンはテーマごとにまとめて表示。</dd>
+          <dd><code>MapLibre</code> に OpenFreeMap の地図を表示しています。夜用の配色は自作で、ピンはテーマごとにまとめて表示します。</dd>
         </dl>
         <dl>
           <dt>スポットの計算</dt>
-          <dd><code>Python</code>。地域を区画に分けて並列に計算し、都県ごとにランキング。標高は Mapzen の地形タイル、建物・道・水辺は Overture Maps。</dd>
+          <dd><code>Python</code> で、地域を区画に分けて並列に計算し、都県ごとに順位を付けます。標高は Mapzen の地形タイル、建物・道・水辺は Overture Maps のデータです。</dd>
           <dt>端末での計算</dt>
-          <dd>日の出・日の入り（<code>suncalc</code>）、方角と距離、撮りどきの判定。天気だけ Open-Meteo から取得。</dd>
+          <dd>日の出・日の入り（<code>suncalc</code>）、方角と距離、撮りどきの判定は端末で行います。天気だけ Open-Meteo から取得します。</dd>
         </dl>
       </div>
     </div>
@@ -486,70 +521,73 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
   <section class="chapter" id="process">
     <header>
-      <span class="label">08 / 進め方</span>
-      <h2>AI と分担して、判断は自分で</h2>
+      <span class="label">08</span>
+      <h2>開発の進め方</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
-      <p>開発には AI コーディングアシスタントの Claude を使いました。機能ごとに作業を分けて変更をプルリクエストで受け取り、画面で確かめてから取り込む進め方です。</p>
+      <p>開発には AI コーディングアシスタントの Claude を使いました。機能ごとに作業を分けて、変更をプルリクエストで受け取り、画面で確かめてから取り込む進め方です。</p>
       <div class="roles">
         <div class="role">
           <h3>自分が担当したこと</h3>
-          <p>誰に向けて何を作るかの決定、仕様と優先順位、試作結果のストリートビューでの確認、画面の使い勝手の指摘、変更の確認と取り込み、公開までの計画。</p>
+          <p>誰に向けて何を作るかの決定、仕様と優先順位、試作結果のストリートビューでの確認、画面の使い勝手の指摘、変更の確認と取り込み、公開までの計画を担当しました。</p>
         </div>
         <div class="role ai">
           <h3>AI に任せたこと</h3>
-          <p>競合とデータの調べもの、計算処理とアプリのコードの実装、画面のプレビュー作成。出てきた案や結果は、採るかどうかを自分で決めました。</p>
+          <p>競合やデータの調査、計算処理とアプリのコードの実装、画面のプレビュー作成を任せました。出てきた案や結果を採用するかどうかは、自分で決めています。</p>
         </div>
       </div>
       <dl class="decisions">
-        <div><dt>対象を「スマホで撮る一般の人」に絞った</dt><dd>カメラ愛好家向けは海外の有料アプリが強い。日本の一般ユーザー向けには、定着したアプリが見当たらなかった。</dd></div>
-        <div><dt>写真の投稿と共有を初版から外した</dt><dd>ログインとサーバーが必要になり、公開が遅れて費用もかかる。まずは一人で使って価値が出る形で出す。</dd></div>
-        <div><dt>AI による意味検索ではなく、言葉の辞書で探す方式にした</dt><dd>端末に AI モデルを入れるとアプリが重くなり、サーバーで動かすと費用がかかる。「無料・サーバーなし」の方針を優先した。</dd></div>
-        <div><dt>夜の地図の配色を作り直した</dt><dd>既製のダーク地図は黒すぎると感じたので、昼の地図の配色をもとに夜用を作り直してもらった。</dd></div>
-        <div><dt>Android を先に、初版は広告なしで出す</dt><dd>Google Play の公開条件（テスターの期間）を先に満たし、反応を見てから iOS と収益化を考える。</dd></div>
+        <div><dt>対象を「スマホで撮る一般の人」に絞った</dt><dd>カメラ愛好家向けは海外の有料アプリが強い一方、日本の一般ユーザー向けには定着したアプリが見当たらなかったためです。</dd></div>
+        <div><dt>写真の投稿と共有を初版から外した</dt><dd>ログインとサーバーが必要になり、公開が遅れて費用もかかるためです。まずは一人で使っても役に立つ形で出します。</dd></div>
+        <div><dt>AI による意味検索ではなく、言葉の辞書で探す方式にした</dt><dd>端末に AI モデルを入れるとアプリが重くなり、サーバーで動かすと費用がかかるためです。「無料・サーバーなし」の方針を優先しました。</dd></div>
+        <div><dt>夜の地図の配色を作り直した</dt><dd>既製のダーク地図は黒すぎると感じたので、昼の地図の配色をもとに夜用を作り直しました。</dd></div>
+        <div><dt>Android を先に、初版は広告なしで出す</dt><dd>Google Play の公開条件（テスト期間）を先に満たし、反応を見てから iOS 版と収益化を考えます。</dd></div>
       </dl>
     </div>
   </section>
 
   <section class="chapter" id="log">
     <header>
-      <span class="label">09 / 制作の記録</span>
-      <h2>1週間で3都県まで</h2>
+      <span class="label">09</span>
+      <h2>制作の記録</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <ol class="timeline">
-        <li><time>10/14</time><div><b>競合調査とターゲットの決定</b><span>15以上のサービスを調べ、スマホで撮る国内の一般ユーザーに絞る。地形からスポットを見つける方法を試作。</span></div></li>
-        <li><time>10/15</time><div><b>仕様を固めて開発開始</b><span>全テーマの候補をストリートビューで確認し方向性を決定。仕様書を書き、その日のうちに最初の Android ビルド。</span></div></li>
-        <li><time>10/16</time><div><b>探し方を広げる</b><span>言葉のニュアンス検索、近所のおすすめでのすき間埋め、構図のコツ。</span></div></li>
-        <li><time>10/17</time><div><b>東京・神奈川の全域へ</b><span>計算を区画ごとに分ける仕組みを作り、3,845 か所に。天気・リスト・バッジ・通知・バックアップなども追加。</span></div></li>
-        <li><time>10/18</time><div><b>千葉県を追加</b><span>海の判定を見直し、利根川沿いの低地が「海」になる誤りを直して 3,636 か所。</span></div></li>
-        <li><time>10/19</time><div><b>地図の使い勝手とローンチ計画</b><span>ピンのまとめ表示、範囲内の一覧、夜の地図。Android を先に出すと決める。</span></div></li>
-        <li class="plan"><time>10/27〜</time><div><b>クローズドテスト</b><span>Google Play の条件（12人以上・14日間）に沿ってテスト。</span></div></li>
-        <li class="plan"><time>11月中旬</time><div><b>Google Play で公開</b><span>そのあと iOS 版。</span></div></li>
+        <li><time>10/14</time><div><b>競合調査と対象の決定</b><span>15以上のサービスを調べ、スマホで撮る国内の一般ユーザーに絞りました。地形からスポットを見つける方法も試作しました。</span></div></li>
+        <li><time>10/15</time><div><b>仕様を固めて開発開始</b><span>全テーマの候補をストリートビューで確認して方向性を決め、仕様書を書きました。同じ日に最初の Android ビルドを作りました。</span></div></li>
+        <li><time>10/16</time><div><b>探し方を広げる</b><span>言葉のニュアンス検索、近所のおすすめによるすき間埋め、構図のコツを追加しました。</span></div></li>
+        <li><time>10/17</time><div><b>東京・神奈川の全域へ</b><span>計算を区画ごとに分ける仕組みを作り、3,845 か所にしました。天気・リスト・バッジ・通知・バックアップなども追加しました。</span></div></li>
+        <li><time>10/18</time><div><b>千葉県を追加</b><span>海の判定を見直し、利根川沿いの低地が「海」になる誤りを直して 3,636 か所を追加しました。</span></div></li>
+        <li><time>10/19</time><div><b>地図の使い勝手とローンチ計画</b><span>ピンのまとめ表示、範囲内の一覧、夜の地図を作りました。Android を先に出すことを決めました。</span></div></li>
+        <li class="plan"><time>10/27〜</time><div><b>クローズドテスト</b><span>Google Play の条件（12人以上・14日間）に沿ってテストします。</span></div></li>
+        <li class="plan"><time>11月中旬</time><div><b>Google Play で公開</b><span>そのあと iOS 版を出します。</span></div></li>
       </ol>
     </div>
   </section>
 
   <section class="chapter" id="next">
     <header>
-      <span class="label">10 / これから</span>
-      <h2>次にやりたいこと</h2>
+      <span class="label">10</span>
+      <h2>これから</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <ul class="next">
         <li>写真と評価の共有<span>みんなの「当たり」で、未確認のスポットを確認済みに育てる</span></li>
         <li>撮りどきの判定を賢く<span>桜の開花・紅葉の色づき・天気から「今日がいい」を知らせる</span></li>
         <li>関東の外へ<span>同じ計算の仕組みで県単位に広げる</span></li>
-        <li>iOS 版<span>Android の公開後に</span></li>
+        <li>iOS 版<span>Android 版の公開後に</span></li>
       </ul>
     </div>
   </section>
 
   <footer>
-    <p class="who">企画・開発: ゆうご</p>
+    <p class="who">企画・開発: yugo303</p>
     <p>実装には AI コーディングアシスタント Claude を使用しています。</p>
     <p>地図・スポットのデータ: © OpenStreetMap contributors、Overture Maps Foundation、Mapzen Terrain Tiles、OpenFreeMap。天気: Open-Meteo（CC BY 4.0）。</p>
-    <p>画面はすべて開発中のものです。数値は 2026年10月20日時点。</p>
+    <p>画面はすべて開発中のものです。数値は 2026年10月20日時点です。</p>
   </footer>
 </div>
 
