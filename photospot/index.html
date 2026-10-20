@@ -160,6 +160,15 @@ section.chapter { scroll-margin-top: 16px; display: grid; grid-template-columns:
 .wide .scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--line); }
 .wide img { display: block; width: 100%; min-width: 640px; height: auto; }
 .wide figcaption { font-size: 14px; color: var(--soft); }
+.trial { display: grid; gap: 14px; margin-bottom: 36px; }
+.trial h3 { margin: 0; font-size: 18px; }
+.trial p { margin: 0; color: var(--soft); line-height: 1.85; }
+.trial-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 560px; }
+.trial-row figure { margin: 0; display: grid; gap: 8px; align-content: start; }
+.trial-row img { width: 100%; aspect-ratio: 9 / 10; object-fit: cover; display: block; border-radius: 14px; border: 1px solid var(--line); }
+.trial-row figcaption { font-size: 14px; line-height: 1.65; }
+.trial-row figcaption b { display: block; font-size: 15px; }
+.trial-row figcaption span { color: var(--soft); }
 
 /* 機能一覧 */
 .features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0; padding: 0; list-style: none; }
@@ -242,7 +251,8 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   .fix p { grid-template-columns: 2.6em minmax(0, 1fr); }
   .fix p b { font-size: 12.5px; }
   .pillar, .stack dl, .toc { padding: 16px; }
-  .phone figcaption { font-size: 15px; }
+  .phone figcaption, .trial-row figcaption { font-size: 15px; }
+  .trial p { font-size: 16px; }
   .phone figcaption b, .features li, .next li, .timeline b, .decisions dt, .stack dt, .fix h3, .market h3, .role h3 { font-size: 16.5px; }
   .toc a { font-size: 16px; }
   .bar { font-size: 15px; }
@@ -380,7 +390,7 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
           <span class="num">約96%<small>4,383 か所中 4,228 か所</small></span>
           <p>眺めのテーマで選んだ場所のうち、地図データに展望スポットとして登録された地点から 300m 以上離れている場所の割合です。これまで眺めのいい場所として扱われていなかった場所が、ほとんどを占めています。</p>
         </div>
-        <p>一方で、計算だけで選ぶので外れもあります。そこで候補には「未確認」と表示し、行った人が「当たり・微妙・外れ」を記録できるようにしました。今後はこの評価を共有して、未確認の候補を確認済みのスポットに育てていく予定です。</p>
+        <p>一方で、計算だけで選ぶので外れもあります。そこで候補には「未確認」と表示し、行った人が「当たり・微妙・外れ」を記録できるようにしました。今後はこの評価を共有して、未確認の候補を確認済みのスポットに育てていく予定です。実際に行ってみた例は<a href="#next">「10 これから」</a>に載せています。</p>
       </div>
     </div>
   </section>
@@ -478,7 +488,7 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
-<p class="note">実機（Android）の画面です。このページをライト表示で見るとライトモード、ダーク表示で見るとダークモードの画面に切り替わります。</p>
+<p class="note">実機（Android）の画面です。このページをライト表示で見るとライトモード、ダーク表示で見るとダークモードの画面に切り替わります（片方だけの画面もあります）。</p>
       <div class="phones">
         <figure class="phone">
           <div class="frame"><img class="shot-l" src="img/map-l.webp" alt="東京・神奈川の地図にスポットのまとまりが並ぶ画面（ライト）" loading="lazy"><img class="shot-d" src="img/map-d.webp" alt="東京・神奈川の地図にスポットのまとまりが並ぶ画面（ダーク）" loading="lazy"></div>
@@ -509,8 +519,24 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
           <figcaption><b>ここへ行く</b><span>矢印と距離だけのシンプルな案内です。途中の寄り道候補も出します。</span></figcaption>
         </figure>
         <figure class="phone">
-          <div class="frame"><img src="img/guide.webp" alt="構図ガイド。撮る方角のコンパス、日の出と日の入り、画角のアドバイス" loading="lazy"></div>
-          <figcaption><b>構図ガイド（開発中のプレビュー）</b><span>撮る方角、時間帯、ズームの倍率を示します。撮ったら「当たり・微妙・外れ」を記録できます。</span></figcaption>
+          <div class="frame"><img src="img/arrive-l.webp" alt="スポットまで23m、到着しましたと表示された案内画面" loading="lazy"></div>
+          <figcaption><b>到着</b><span>近くまで来ると「到着しました」に変わり、そのまま構図ガイドを開けます。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/guide-d.webp" alt="構図ガイド。右に150°向いてくださいと示すコンパスと、夕日が正面に沈む時刻の案内" loading="lazy"></div>
+          <figcaption><b>構図ガイド</b><span>撮る方角をコンパスで示します。開けた方角の正面に夕日が沈む日は、その時刻も知らせます。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/camera.webp" alt="カメラ画面。三分割の線と、開けた方角まで左に124°、おすすめの画角の一言" loading="lazy"></div>
+          <figcaption><b>カメラ</b><span>アプリ内のカメラに、三分割の線と「開けた方角まで左に124°」のような案内を重ねます。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/rate-d.webp" alt="撮影後の画面。共有ボタンと、当たり・微妙・外れの評価ボタン" loading="lazy"></div>
+          <figcaption><b>撮ったあと</b><span>LINE や Instagram に共有でき、その場所を「当たり・微妙・外れ」で記録します。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/tips-d.webp" alt="作例とコツ。構図の図、あなたがここで撮った写真、時期と光、3つのコツ" loading="lazy"></div>
+          <figcaption><b>作例とコツ</b><span>テーマ別の構図の図と撮り方のコツに、自分がそこで撮った写真も並びます。</span></figcaption>
         </figure>
         <figure class="phone">
           <div class="frame"><img class="shot-l" src="img/stats-l.webp" alt="行った場所や撮影の数と、バッジの一覧（ライト）" loading="lazy"><img class="shot-d" src="img/stats-d.webp" alt="行った場所や撮影の数と、バッジの一覧（ダーク）" loading="lazy"></div>
@@ -526,10 +552,6 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       <figure class="wide">
         <div class="scroll"><img src="img/search.webp" alt="「エモい場所」「ちるできるとこ」「映える花」「穴場」「やばい景色」で検索した結果の画面5枚"></div>
         <figcaption>言葉で探した結果（開発中のプレビュー）。「エモい場所」「ちるできるとこ」「穴場」などを、夕日・水辺・森といった条件に読み替えて絞り込みます。</figcaption>
-      </figure>
-      <figure class="wide">
-        <div class="scroll"><img src="img/tips.webp" alt="桜並木、水平線、鳥居、森の小道のテーマ別の構図の図と撮り方のコツ" ></div>
-        <figcaption>テーマ別の撮り方（開発中のプレビュー）。構図の図、撮りどきの時期と光、3つのコツと注意点をまとめて出します。</figcaption>
       </figure>
       <figure class="wide">
         <div class="scroll"><img src="img/onboarding.webp" alt="初回起動時の質問。撮影に慣れているか、どんな写真を撮りたいかを選ぶ"></div>
@@ -640,6 +662,21 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
+      <div class="trial">
+        <h3>現地で試してわかった課題</h3>
+        <p>公開前に、アプリが出した候補へ実際に行って撮ってみました。</p>
+        <div class="trial-row">
+          <figure>
+            <img src="img/trial-miss.webp" alt="小野岳で撮った写真。街路樹の幹と葉、車道とビルが写っている" loading="lazy">
+            <figcaption><b>小野岳（外れ）</b><span>写ったのはほぼ木と道路だけでした。</span></figcaption>
+          </figure>
+          <figure>
+            <img src="img/trial-hit.webp" alt="水生植物園で撮った写真。木々に囲まれた池とススキ" loading="lazy">
+            <figcaption><b>水生植物園（当たり）</b><span>いい写真が撮れましたが、有料の公園の中でした（庭園内のみ。一般200円、大学生160円）。</span></figcaption>
+          </figure>
+        </div>
+        <p>外れが出ることと、入るのにお金がかかるかどうかが事前にわからないことは、写真の投稿に頼らず地形から自動で探す方式の裏返しです。近所の穴場が見つかる良さとのトレードオフとして残っている、これからの課題です。まずは行った人の評価の共有で外れを減らし、有料の施設かどうかも地図データなどから表示できないか検討します。</p>
+      </div>
       <ul class="next">
         <li>写真と評価の共有<span>みんなの「当たり」で、未確認のスポットを確認済みに育てる</span></li>
         <li>撮りどきの判定を賢く<span>桜の開花・紅葉の色づき・天気から「今日がいい」を知らせる</span></li>
