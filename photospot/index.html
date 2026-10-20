@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>フォトスポット 制作ポートフォリオ</title>
+<meta name="description" content="地形と地図のデータから景色のいい場所を見つけ、スマホでの撮り方まで教えるアプリ。狙い・仕組み・画面・制作の記録。">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:title" content="フォトスポット 制作ポートフォリオ">
+<meta property="og:description" content="作例がなくても、いい景色は地形から見つかる。地形データから撮影スポットを見つけるアプリの制作記録です。">
+<meta property="og:url" content="https://yugo303.github.io/photospot/">
+<meta property="og:image" content="https://yugo303.github.io/photospot/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 1本の縦長ケーススタディ。冒頭は実データの「360度の見通し」図、あとは章ごとに 2 カラム（見出し｜本文）→ スマホでは 1 カラム */
+:root {
+  --paper: #F2F5F8;
+  --panel: #FFFFFF;
+  --ink: #15202B;
+  --muted: #5A6877;
+  --line: #D6DDE4;
+  --sun: #E8660F;
+  --sun-soft: rgba(232, 102, 15, 0.14);
+  --sea: #1C6FB8;
+  --t-coast: #1C7ED6; --t-inland: #7048E8; --t-sakura: #F06595; --t-koyo: #E8590C;
+  --t-flower: #D6336C; --t-forest: #2F9E44; --t-mystic: #AE3EC9;
+  --f-display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1419; --panel: #171E26; --ink: #E8EDF2; --muted: #93A1AF; --line: #27323D;
+    --sun: #FF8E42; --sun-soft: rgba(255, 142, 66, 0.16); --sea: #5AA6E8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1419; --panel: #171E26; --ink: #E8EDF2; --muted: #93A1AF; --line: #27323D;
+  --sun: #FF8E42; --sun-soft: rgba(255, 142, 66, 0.16); --sea: #5AA6E8; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.85;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--sea); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.label {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em;
+  color: var(--muted); text-transform: uppercase;
+}
+
+/* 上部バー */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding-block: 20px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.brand { font-family: var(--f-display); font-size: 18px; letter-spacing: 0.02em; }
+.status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sun); }
+
+/* ヒーロー */
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 56px 48px; }
+.hero h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 5.4vw, 60px); line-height: 1.28; letter-spacing: 0.01em; }
+.hero h1 em { font-style: normal; color: var(--sun); }
+.lead { margin-top: 22px; font-size: 17px; color: var(--muted); max-width: 34em; }
+.facts { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; background: var(--panel); }
+.fact b { font-family: var(--f-mono); font-weight: 500; }
+.dial { margin: 0; display: grid; gap: 10px; justify-items: center; }
+.dial svg { width: 100%; max-width: 460px; height: auto; display: block; }
+.dial figcaption { font-size: 13px; color: var(--muted); text-align: center; max-width: 30em; }
+.ring { fill: none; stroke: var(--line); stroke-width: 1; }
+.spoke { stroke: var(--line); stroke-width: 1; }
+.view { fill: var(--sun-soft); stroke: var(--sun); stroke-width: 2; stroke-linejoin: round; }
+.card-dir { fill: var(--muted); font: 500 16px var(--f-body); }
+.lm-tick { stroke: var(--sea); stroke-width: 2.5; stroke-linecap: round; }
+.lm-text { fill: var(--sea); font: 700 16px var(--f-body); }
+.lm-sub { fill: var(--muted); font: 400 13.5px var(--f-mono); }
+.center-dot { fill: var(--ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .view { animation: grow 1.4s cubic-bezier(.2,.7,.2,1) both; transform-origin: 200px 200px; }
+  @keyframes grow { from { transform: scale(.35); opacity: .4; } to { transform: scale(1); opacity: 1; } }
+}
+
+/* 章 */
+section.chapter { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-block: 56px; border-top: 1px solid var(--line); }
+.chapter > header { display: grid; gap: 8px; align-content: start; }
+.chapter h2 { font-size: 26px; font-weight: 700; line-height: 1.4; }
+.body { display: grid; gap: 24px; min-width: 0; }
+.body > p { max-width: 40em; }
+.muted { color: var(--muted); }
+
+/* 競合 */
+.market { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.market div { border-top: 3px solid var(--line); padding-top: 12px; display: grid; gap: 6px; align-content: start; }
+.market h3 { font-size: 16px; }
+.market p { font-size: 14.5px; color: var(--muted); line-height: 1.75; }
+.gap-note { border-left: 3px solid var(--sun); padding: 4px 0 4px 16px; font-weight: 500; max-width: 40em; }
+
+/* 3つの柱 */
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pillar { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 8px; align-content: start; }
+.pillar h3 { font-size: 18px; line-height: 1.5; }
+.pillar p { font-size: 14.5px; color: var(--muted); line-height: 1.75; }
+.pillar .vs { font-size: 13px; color: var(--ink); border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 4px; }
+
+/* 仕組み */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s); font-family: var(--f-mono); font-weight: 500; color: var(--sun); font-size: 15px; padding-top: 2px; }
+.steps b { display: block; }
+.steps span { color: var(--muted); font-size: 14.5px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.stat { display: grid; gap: 4px; align-content: start; }
+.stat .num { font-family: var(--f-mono); font-size: 34px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat .num small { font-size: 16px; color: var(--muted); margin-left: 4px; }
+.stat p { font-size: 13.5px; color: var(--muted); line-height: 1.7; }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 4.5em; gap: 10px; align-items: center; font-size: 14px; }
+.bar .track { height: 12px; background: var(--line); border-radius: 6px; overflow: hidden; }
+.bar .fill { height: 100%; border-radius: 6px; }
+.bar .n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); font-size: 13px; }
+.note { font-size: 12.5px; color: var(--muted); }
+
+/* 画面 */
+.phones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 20px; }
+.phone { margin: 0; display: grid; gap: 10px; align-content: start; }
+.phone .frame { aspect-ratio: 1 / 2; max-width: 100%; border-radius: 22px; overflow: hidden; border: 6px solid var(--ink); background: var(--ink); }
+.phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.phone figcaption { font-size: 14px; line-height: 1.65; }
+.phone figcaption b { display: block; font-size: 15px; }
+.phone figcaption span { color: var(--muted); }
+.wide { margin: 0; display: grid; gap: 10px; }
+.wide .scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--line); }
+.wide img { display: block; width: 100%; min-width: 640px; height: auto; }
+.wide figcaption { font-size: 14px; color: var(--muted); }
+
+/* 機能一覧 */
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0; padding: 0; list-style: none; }
+.features li { padding-block: 10px; border-bottom: 1px solid var(--line); font-size: 15px; display: grid; gap: 2px; }
+.features li span { color: var(--muted); font-size: 13.5px; }
+
+/* 技術 */
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.stack dl { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; }
+.stack dt { font-weight: 700; font-size: 15px; }
+.stack dd { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.75; }
+.stack dd code { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); }
+
+/* 制作の記録 */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.timeline time { font-family: var(--f-mono); font-size: 14px; color: var(--muted); padding-top: 2px; }
+.timeline li.plan time { color: var(--sun); }
+.timeline li.plan b::after { content: "予定"; margin-left: 8px; font-size: 11.5px; font-weight: 500; color: var(--sun); border: 1px solid var(--sun); border-radius: 4px; padding: 0 5px; vertical-align: 2px; }
+.timeline b { display: block; font-size: 15px; }
+.timeline span { color: var(--muted); font-size: 14px; }
+
+.next { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 32px; margin: 0; padding: 0; list-style: none; }
+.next li { font-size: 15px; display: grid; gap: 2px; }
+.next li span { color: var(--muted); font-size: 13.5px; }
+
+footer { border-top: 1px solid var(--line); padding-block: 32px 48px; display: grid; gap: 10px; font-size: 13px; color: var(--muted); }
+footer .who { font-size: 15px; color: var(--ink); }
+
+
+/* 工夫と判断 */
+.fixes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.fix { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; background: var(--panel); }
+.fix h3 { font-size: 16px; line-height: 1.5; }
+.fix p { font-size: 14px; line-height: 1.75; color: var(--muted); display: grid; grid-template-columns: 3.2em minmax(0, 1fr); gap: 8px; }
+.fix p b { font-family: var(--f-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.04em; color: var(--sun); padding-top: 2px; }
+.fix p.fix-a b { color: var(--sea); }
+.roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.role { display: grid; gap: 6px; align-content: start; border-top: 3px solid var(--sun); padding-top: 12px; }
+.role.ai { border-top-color: var(--line); }
+.role h3 { font-size: 16px; }
+.role p { font-size: 14.5px; color: var(--muted); line-height: 1.75; }
+.decisions { margin: 0; display: grid; }
+.decisions div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.decisions dt { font-weight: 700; font-size: 15px; }
+.decisions dd { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75; }
+
+a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 36px 32px; gap: 28px; }
+  section.chapter { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 40px; }
+  .market, .pillars { grid-template-columns: minmax(0, 1fr); }
+  .phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .features, .stack, .next, .fixes, .roles { grid-template-columns: minmax(0, 1fr); }
+  .decisions div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (max-width: 420px) {
+  .bar { grid-template-columns: 6.2em minmax(0, 1fr) 3.8em; font-size: 13px; }
+  .phones { gap: 20px 12px; }
+  .phone .frame { border-width: 4px; border-radius: 16px; }
+}
+</style>
+
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <span class="brand">フォトスポット<span class="muted" style="font-family: var(--f-body); font-size: 13px; margin-left: 6px;">（仮称）</span></span>
+    <span class="status">Android 版を 2026年11月に公開予定</span>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="label">個人開発 / スマホアプリ / 2026年10月〜</p>
+      <h1 style="margin-top: 14px;">作例がなくても、<br><em>いい景色</em>は<br>地形から見つかる。</h1>
+      <p class="lead">地形と地図のデータから「景色がいい場所」を自動で見つけ、どこに立ち、どちらを向き、いつ撮ればいいかまでスマホで教えるアプリです。誰かが撮った写真に頼らないので、住宅地や郊外でも提案が尽きません。</p>
+      <div class="facts">
+        <span class="fact">東京・神奈川・千葉 <b>7,481</b> か所</span>
+        <span class="fact">無料・広告なし・ログイン不要</span>
+        <span class="fact">オフラインで動く</span>
+      </div>
+    </div>
+    <figure class="dial">
+      <svg viewBox="-80 10 560 390" role="img" aria-label="八景島桟橋から360度どの方角が開けているかを示す図。東から南にかけて大きく開け、西に富士山、北北東に東京スカイツリーがある。">
+        <circle class="ring" cx="200" cy="200" r="46.7"></circle>
+        <circle class="ring" cx="200" cy="200" r="93.3"></circle>
+        <circle class="ring" cx="200" cy="200" r="140"></circle>
+        <line class="spoke" x1="200" y1="60" x2="200" y2="340"></line>
+        <line class="spoke" x1="60" y1="200" x2="340" y2="200"></line>
+        <line class="spoke" x1="101" y1="101" x2="299" y2="299"></line>
+        <line class="spoke" x1="299" y1="101" x2="101" y2="299"></line>
+        <path class="view" d="M200.0,123.4 L206.0,85.7 L211.7,88.5 L217.2,91.5 L224.3,85.6 L230.3,87.1 L236.9,86.3 L241.0,93.2 L244.7,99.6 L252.0,98.0 L258.5,98.7 L259.8,107.9 L256.9,121.7 L253.8,133.5 L255.6,138.2 L284.5,115.5 L288.9,120.0 L292.9,124.8 L296.7,129.7 L300.3,134.9 L303.5,140.2 L306.5,145.7 L309.2,151.4 L311.6,157.2 L313.7,163.1 L315.5,169.1 L316.9,175.1 L318.1,181.3 L318.9,187.5 L319.4,193.7 L319.6,200.0 L319.4,206.3 L318.9,212.5 L318.1,218.7 L316.9,224.9 L315.5,230.9 L313.7,236.9 L311.6,242.8 L309.2,248.6 L306.5,254.3 L303.5,259.8 L300.3,265.1 L296.7,270.3 L292.9,275.2 L288.9,280.0 L284.5,284.5 L280.0,288.9 L275.2,292.9 L270.3,296.7 L262.3,296.0 L257.2,299.1 L252.0,302.0 L244.7,300.4 L239.4,302.6 L233.3,302.5 L226.9,300.2 L221.6,301.5 L215.9,300.7 L211.3,307.1 L205.1,296.7 L200.0,303.8 L194.7,301.8 L189.5,299.6 L184.6,297.2 L179.9,294.7 L174.1,296.7 L171.0,289.1 L165.3,290.4 L161.3,287.0 L156.0,286.3 L151.6,283.8 L148.1,279.9 L144.9,275.8 L142.9,270.6 L140.2,266.5 L135.8,264.2 L132.5,260.8 L129.4,257.1 L124.2,255.1 L118.8,252.7 L117.5,247.6 L113.7,244.0 L113.0,238.7 L117.8,231.6 L112.3,228.5 L113.6,223.1 L111.2,218.9 L110.3,214.2 L106.8,209.8 L107.9,204.8 L111.9,200.0 L112.0,195.4 L113.7,190.9 L114.3,186.4 L112.5,181.4 L114.9,177.2 L115.0,172.4 L115.2,167.5 L118.3,163.6 L120.3,159.4 L124.8,156.6 L126.1,152.0 L126.5,146.6 L128.3,142.0 L129.2,136.3 L134.8,134.8 L141.9,135.5 L144.6,131.5 L145.8,125.4 L154.1,129.3 L159.6,130.0 L158.8,119.1 L161.3,113.0 L168.4,117.8 L173.9,119.8 L175.7,109.5 L178.4,98.5 L184.3,101.1 L188.3,88.5 L194.0,85.7 Z"></path>
+        <circle class="center-dot" cx="200" cy="200" r="4"></circle>
+        <text class="card-dir" x="200" y="42" text-anchor="middle">北</text>
+        <text class="card-dir" x="366" y="205" text-anchor="middle">東</text>
+        <text class="card-dir" x="200" y="372" text-anchor="middle">南</text>
+        <text class="card-dir" x="34" y="205" text-anchor="middle">西</text>
+        <!-- 富士山 271.7° 83.3km -->
+        <line class="lm-tick" x1="60.1" y1="195.9" x2="44.1" y2="195.5"></line>
+        <text class="lm-text" x="30" y="168" text-anchor="end">富士山</text>
+        <text class="lm-sub" x="30" y="186" text-anchor="end">272° 83km</text>
+        <!-- 東京スカイツリー 20.0° 44.1km -->
+        <line class="lm-tick" x1="247.9" y1="68.4" x2="253.4" y2="53.4"></line>
+        <text class="lm-text" x="262" y="40">東京スカイツリー</text>
+        <text class="lm-sub" x="262" y="58">20° 44km</text>
+      </svg>
+      <figcaption><span class="mono">35.338°N 139.645°E</span> 八景島桟橋の「360度の見通し」。オレンジが外に広がる方角ほど遠くまで見渡せます。アプリが標高と建物の高さから計算した実際のデータです。</figcaption>
+    </figure>
+  </header>
+
+  <section class="chapter" id="market">
+    <header>
+      <span class="label">01 / 見つけた空白</span>
+      <h2>撮影地アプリは、日本とスマホの人に向いていなかった</h2>
+    </header>
+    <div class="body">
+      <p>作り始める前に、国内外のフォトスポット系アプリを15以上調べました。</p>
+      <div class="market">
+        <div>
+          <h3>海外のアプリ</h3>
+          <p>Locationscout、PhotoPills など。カメラ愛好家向けのサブスク（年 数千〜1万円台）が中心で、日本のスポットは少なめ。</p>
+        </div>
+        <div>
+          <h3>国内のアプリ</h3>
+          <p>エビフォト、SNAPLACE、Prism Japan など。2016〜2022年に出たものの、いまも勢いのある専用アプリは見つかりませんでした。</p>
+        </div>
+        <div>
+          <h3>Google マップと Instagram</h3>
+          <p>「場所を保存して地図に出す」ことは無料でできる。ただし、どこからどう撮るかまでは教えてくれません。</p>
+        </div>
+      </div>
+      <p class="gap-note">どのサービスも「誰かが撮った写真」が出発点です。写真が投稿されていない場所は、どれだけ眺めがよくても地図に出てきません。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="approach">
+    <header>
+      <span class="label">02 / 差別化</span>
+      <h2>3つの方針</h2>
+    </header>
+    <div class="body">
+      <div class="pillars">
+        <div class="pillar">
+          <h3>写真がなくても、地形から見つける</h3>
+          <p>標高・建物・道・樹木・水辺のデータから、眺め・桜・森の小道など7つのテーマで候補を自動で出します。選ばれた理由も「西が開けていて夕日向き」のように文章で示します。</p>
+          <p class="vs">他のアプリ: 投稿された作例が頼り</p>
+        </div>
+        <div class="pillar">
+          <h3>スマホでの撮り方まで教える</h3>
+          <p>撮る方角をコンパスで、日の入りの時刻と方角を計算で、ズームの倍率や水平線の位置を一言で。前に「当たり」を付けた写真を重ねて同じ構図でも撮れます。</p>
+          <p class="vs">他のアプリ: 光の計画は上級者向けの有料機能</p>
+        </div>
+        <div class="pillar">
+          <h3>無料で、すぐ使える</h3>
+          <p>ログインなし・広告なし。スポットはアプリに入っていて、電波の弱い山や海辺でも探せます。常時動くサーバーを持たない作りで、運営費を年2〜3万円に抑えます。</p>
+          <p class="vs">他のアプリ: 無料版は制限が多い</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="how">
+    <header>
+      <span class="label">03 / 仕組み</span>
+      <h2>スポットを自動で見つける流れ</h2>
+    </header>
+    <div class="body">
+      <ol class="steps">
+        <li><div><b>歩ける道に点を置く</b><span>生活道路・遊歩道・階段・山道に約60m間隔で候補地点を置く。高速道路・私道・立入禁止は除く。</span></div></li>
+        <li><div><b>地表の形をつくる</b><span>地面の標高に、建物の高さ（なければ戸建7m・集合住宅12mと推定）と森（12m）を重ねる。</span></div></li>
+        <li><div><b>360度の見通しを計算する</b><span>各地点から全方角の見上げ角を求め、遠くまで見渡せる面積、水面の量、富士山やスカイツリーが見える方角を出す。</span></div></li>
+        <li><div><b>テーマごとに点数をつける</b><span>眺めは見通しと高低差、桜・紅葉・花は周囲の樹木の量、森の小道や神秘的な場所は森の割合や社寺・滝・巨木で評価する。</span></div></li>
+        <li><div><b>都県ごとのファイルにしてアプリに入れる</b><span>重なる地点をまとめ、市区町村ごとの偏りをならしてから書き出す。地図の絞り込みや日の出・日の入りの計算は端末で行う。</span></div></li>
+      </ol>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="num">7,481<small>か所</small></span>
+          <p>東京 1,665・神奈川 2,180・千葉 3,636。うち 1,234 か所が名所クラス、残りは「近所のおすすめ」。</p>
+        </div>
+        <div class="stat">
+          <span class="num">37%<small>vs 10%</small></span>
+          <p>地図上の既存の展望スポット245件のうち、点数の上位10%に入った割合。ランダムなら10%。</p>
+        </div>
+        <div class="stat">
+          <span class="num">28<small>/ 50</small></span>
+          <p>手で選んだ有名撮影地50か所のうち、300m以内にスポットがあった数。ランダムに置くと11か所。</p>
+        </div>
+      </div>
+
+      <div class="bars" aria-label="テーマ別のスポット数">
+        <p class="label">テーマ別のスポット数（1か所が複数テーマに入ることがあります）</p>
+        <div class="bar"><span>内陸の眺め</span><div class="track"><div class="fill" style="width: 100%; background: var(--t-inland)"></div></div><span class="n">3,514</span></div>
+        <div class="bar"><span>森の小道</span><div class="track"><div class="fill" style="width: 67.5%; background: var(--t-forest)"></div></div><span class="n">2,371</span></div>
+        <div class="bar"><span>海・港の眺め</span><div class="track"><div class="fill" style="width: 24.7%; background: var(--t-coast)"></div></div><span class="n">869</span></div>
+        <div class="bar"><span>桜</span><div class="track"><div class="fill" style="width: 6.3%; background: var(--t-sakura)"></div></div><span class="n">222</span></div>
+        <div class="bar"><span>神秘的な場所</span><div class="track"><div class="fill" style="width: 5.9%; background: var(--t-mystic)"></div></div><span class="n">207</span></div>
+        <div class="bar"><span>紅葉・黄葉</span><div class="track"><div class="fill" style="width: 5.1%; background: var(--t-koyo)"></div></div><span class="n">178</span></div>
+        <div class="bar"><span>花</span><div class="track"><div class="fill" style="width: 4.5%; background: var(--t-flower)"></div></div><span class="n">159</span></div>
+      </div>
+      <p class="note">最初の試作（横浜市と都内南部4区）は、上位の候補を自分でひとつずつストリートビューで確かめ、方向性が合っていることを確認してから広げました。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="craft">
+    <header>
+      <span class="label">04 / 工夫したところ</span>
+      <h2>精度と速さのために直したこと</h2>
+    </header>
+    <div class="body">
+      <div class="fixes">
+        <div class="fix">
+          <h3>海沿いばかりが上位に来る</h3>
+          <p><b>課題</b><span>最初の採点では、見通しのよい海沿いが上位をほぼ独占し、内陸の眺めや桜の名所が埋もれた。</span></p>
+          <p class="fix-a"><b>対応</b><span>採点を7つのテーマに分け、テーマごとに上位を選ぶ方式に変更。眺めは「海・港」と「内陸」に分けた。</span></p>
+        </div>
+        <div class="fix">
+          <h3>川沿いの低地が「海」になる</h3>
+          <p><b>課題</b><span>千葉県では、標高 0.5m 以下を海とみなす判定のせいで、利根川や手賀沼のまわりが海の眺めとして選ばれた。</span></p>
+          <p class="fix-a"><b>対応</b><span>海の判定を標高ではなく、海岸線のポリゴンとの重なりで行うように変更。</span></p>
+        </div>
+        <div class="fix">
+          <h3>都心や湾岸に偏る</h3>
+          <p><b>課題</b><span>富士山とスカイツリーが両方見える湾岸の地点が並び、太平洋側や郊外のスポットが押し出された。</span></p>
+          <p class="fix-a"><b>対応</b><span>市区町村ごとに名所クラスの上限（15%）、眺めのテーマは 5km 四方に3か所までに制限。</span></p>
+        </div>
+        <div class="fix">
+          <h3>都県まるごとの計算が重い</h3>
+          <p><b>課題</b><span>建物と標高のデータが大きく、東京・神奈川を一度に見通し計算するとメモリも時間も足りない。</span></p>
+          <p class="fix-a"><b>対応</b><span>地域を 16 の区画に分け、のりしろを付けて区画ごとに計算してから都県単位でまとめ直す流れにした。</span></p>
+        </div>
+        <div class="fix">
+          <h3>データを作り直すと記録が消える</h3>
+          <p><b>課題</b><span>スポットを計算し直すと ID が変わり、保存した「行きたい場所」や撮影の記録が迷子になる。</span></p>
+          <p class="fix-a"><b>対応</b><span>新旧のスポットが 50m 以内なら同じ ID を引き継ぐようにした。</span></p>
+        </div>
+        <div class="fix">
+          <h3>「梅」が花の名所になる</h3>
+          <p><b>課題</b><span>道路名に「梅」が入るだけで花のテーマに入ったり、工業地帯や埋立地が眺めのよい場所に入ったりした。</span></p>
+          <p class="fix-a"><b>対応</b><span>名前の判定を見直し、工業地・埋立地を眺めのテーマから除外。</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="screens">
+    <header>
+      <span class="label">05 / 画面</span>
+      <h2>探す、行く、撮る</h2>
+    </header>
+    <div class="body">
+      <div class="phones">
+        <figure class="phone">
+          <div class="frame"><img src="img/map.webp" alt="地図にテーマ別のピンが並び、選んだスポットのカードが下に出ている画面"></div>
+          <figcaption><b>地図</b><span>ピンの色と形でテーマがわかる。タップで名前と距離のカード。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/suggest.webp" alt="近くのおすすめスポットを、選ばれた理由と見通し図つきで表示する画面"></div>
+          <figcaption><b>近くのおすすめ</b><span>範囲とテーマを選ぶと、理由と見通し図つきで1か所ずつ出る。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/detail.webp" alt="スポット詳細。標高、開けた方角、日の入り時刻、選ばれた理由の一覧"></div>
+          <figcaption><b>スポット詳細</b><span>標高・開けた方角・今日の日の入りと、選ばれた理由の一覧。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/navigate.webp" alt="スポットの方角を大きな矢印と距離で示す案内画面"></div>
+          <figcaption><b>ここへ行く</b><span>矢印と距離だけのシンプルな案内。地図での案内にも切り替えられる。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/guide.webp" alt="構図ガイド。撮る方角のコンパス、日の出と日の入り、画角のアドバイス"></div>
+          <figcaption><b>構図ガイド</b><span>撮る方角、時間帯、ズームの倍率。撮ったら「当たり・微妙・外れ」を記録。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/stats.webp" alt="行った場所や撮影の数と、獲得したバッジの一覧"></div>
+          <figcaption><b>記録とバッジ</b><span>行った場所やエリアの数に応じて20種類のバッジ。</span></figcaption>
+        </figure>
+      </div>
+
+      <figure class="wide">
+        <div class="scroll"><img src="img/search.webp" alt="「エモい場所」「ちるできるとこ」「映える花」「穴場」「やばい景色」で検索した結果の画面5枚"></div>
+        <figcaption>言葉のニュアンスで探せる。「エモい場所」「ちるできるとこ」「穴場」などを、夕日・水辺・森といった条件に読み替えて絞り込みます。</figcaption>
+      </figure>
+      <figure class="wide">
+        <div class="scroll"><img src="img/tips.webp" alt="桜並木、水平線、鳥居、森の小道のテーマ別の構図の図と撮り方のコツ"></div>
+        <figcaption>テーマ別の撮り方。構図の図、撮りどきの時期と光、3つのコツと注意点をセットで出します。</figcaption>
+      </figure>
+      <figure class="wide">
+        <div class="scroll"><img src="img/onboarding.webp" alt="初回起動時の質問。撮影に慣れているか、どんな写真を撮りたいかを選ぶ"></div>
+        <figcaption>最初の質問で、撮影に慣れているかと好みのテーマを聞き、手助けの量とおすすめの並びを変えます。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="chapter" id="features">
+    <header>
+      <span class="label">06 / 機能</span>
+      <h2>初版に入っているもの</h2>
+    </header>
+    <div class="body">
+      <ul class="features">
+        <li>テーマ・言葉で探す<span>7テーマの絞り込みと、言葉のニュアンス検索・検索履歴</span></li>
+        <li>選ばれた理由と360度の見通し<span>見える距離、水面、ランドマークの方角</span></li>
+        <li>構図ガイドとカメラ<span>コンパス、日の出・日の入り、補助線、前の写真の重ね表示</span></li>
+        <li>撮りどきの通知<span>行きたい場所のゴールデンアワー・マジックアワーを知らせる</span></li>
+        <li>7日間の天気<span>撮影地点の予報と正確な日の出・日の入り時刻</span></li>
+        <li>行きたい場所のリストとメモ<span>リスト分け、自分用の撮影地点の調整</span></li>
+        <li>写真の保存と共有<span>写真アプリへの保存、LINE・Instagram などへの共有</span></li>
+        <li>記録の書き出し<span>機種変更のときに記録と写真をまとめて移せる</span></li>
+        <li>ダークモードと夜の地図<span>端末の設定に合わせて切り替え</span></li>
+        <li>誤りの報告<span>閉鎖・立入禁止などをメールで知らせる</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="tech">
+    <header>
+      <span class="label">07 / 技術</span>
+      <h2>サーバーを持たない作り</h2>
+    </header>
+    <div class="body">
+      <p>スポットの計算は事前にまとめて行い、結果を都県ごとのファイルとしてアプリに入れています。利用者が増えても費用が増えず、オフラインでも動きます。</p>
+      <div class="stack">
+        <dl>
+          <dt>アプリ</dt>
+          <dd><code>React Native</code> + <code>Expo SDK 57</code>、画面遷移は <code>expo-router</code>。iOS・Android を1つのコードで。ビルドは EAS。</dd>
+          <dt>地図</dt>
+          <dd><code>MapLibre</code> に OpenFreeMap の地図。夜用の配色は自作。ピンはテーマごとにまとめて表示。</dd>
+        </dl>
+        <dl>
+          <dt>スポットの計算</dt>
+          <dd><code>Python</code>。地域を区画に分けて並列に計算し、都県ごとにランキング。標高は Mapzen の地形タイル、建物・道・水辺は Overture Maps。</dd>
+          <dt>端末での計算</dt>
+          <dd>日の出・日の入り（<code>suncalc</code>）、方角と距離、撮りどきの判定。天気だけ Open-Meteo から取得。</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="process">
+    <header>
+      <span class="label">08 / 進め方</span>
+      <h2>AI と分担して、判断は自分で</h2>
+    </header>
+    <div class="body">
+      <p>開発には AI コーディングアシスタントの Claude を使いました。機能ごとに作業を分けて変更をプルリクエストで受け取り、画面で確かめてから取り込む進め方です。</p>
+      <div class="roles">
+        <div class="role">
+          <h3>自分が担当したこと</h3>
+          <p>誰に向けて何を作るかの決定、仕様と優先順位、試作結果のストリートビューでの確認、画面の使い勝手の指摘、変更の確認と取り込み、公開までの計画。</p>
+        </div>
+        <div class="role ai">
+          <h3>AI に任せたこと</h3>
+          <p>競合とデータの調べもの、計算処理とアプリのコードの実装、画面のプレビュー作成。出てきた案や結果は、採るかどうかを自分で決めました。</p>
+        </div>
+      </div>
+      <dl class="decisions">
+        <div><dt>対象を「スマホで撮る一般の人」に絞った</dt><dd>カメラ愛好家向けは海外の有料アプリが強い。日本の一般ユーザー向けには、定着したアプリが見当たらなかった。</dd></div>
+        <div><dt>写真の投稿と共有を初版から外した</dt><dd>ログインとサーバーが必要になり、公開が遅れて費用もかかる。まずは一人で使って価値が出る形で出す。</dd></div>
+        <div><dt>AI による意味検索ではなく、言葉の辞書で探す方式にした</dt><dd>端末に AI モデルを入れるとアプリが重くなり、サーバーで動かすと費用がかかる。「無料・サーバーなし」の方針を優先した。</dd></div>
+        <div><dt>夜の地図の配色を作り直した</dt><dd>既製のダーク地図は黒すぎると感じたので、昼の地図の配色をもとに夜用を作り直してもらった。</dd></div>
+        <div><dt>Android を先に、初版は広告なしで出す</dt><dd>Google Play の公開条件（テスターの期間）を先に満たし、反応を見てから iOS と収益化を考える。</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="chapter" id="log">
+    <header>
+      <span class="label">09 / 制作の記録</span>
+      <h2>1週間で3都県まで</h2>
+    </header>
+    <div class="body">
+      <ol class="timeline">
+        <li><time>10/14</time><div><b>競合調査とターゲットの決定</b><span>15以上のサービスを調べ、スマホで撮る国内の一般ユーザーに絞る。地形からスポットを見つける方法を試作。</span></div></li>
+        <li><time>10/15</time><div><b>仕様を固めて開発開始</b><span>全テーマの候補をストリートビューで確認し方向性を決定。仕様書を書き、その日のうちに最初の Android ビルド。</span></div></li>
+        <li><time>10/16</time><div><b>探し方を広げる</b><span>言葉のニュアンス検索、近所のおすすめでのすき間埋め、構図のコツ。</span></div></li>
+        <li><time>10/17</time><div><b>東京・神奈川の全域へ</b><span>計算を区画ごとに分ける仕組みを作り、3,845 か所に。天気・リスト・バッジ・通知・バックアップなども追加。</span></div></li>
+        <li><time>10/18</time><div><b>千葉県を追加</b><span>海の判定を見直し、利根川沿いの低地が「海」になる誤りを直して 3,636 か所。</span></div></li>
+        <li><time>10/19</time><div><b>地図の使い勝手とローンチ計画</b><span>ピンのまとめ表示、範囲内の一覧、夜の地図。Android を先に出すと決める。</span></div></li>
+        <li class="plan"><time>10/27〜</time><div><b>クローズドテスト</b><span>Google Play の条件（12人以上・14日間）に沿ってテスト。</span></div></li>
+        <li class="plan"><time>11月中旬</time><div><b>Google Play で公開</b><span>そのあと iOS 版。</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="chapter" id="next">
+    <header>
+      <span class="label">10 / これから</span>
+      <h2>次にやりたいこと</h2>
+    </header>
+    <div class="body">
+      <ul class="next">
+        <li>写真と評価の共有<span>みんなの「当たり」で、未確認のスポットを確認済みに育てる</span></li>
+        <li>撮りどきの判定を賢く<span>桜の開花・紅葉の色づき・天気から「今日がいい」を知らせる</span></li>
+        <li>関東の外へ<span>同じ計算の仕組みで県単位に広げる</span></li>
+        <li>iOS 版<span>Android の公開後に</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p class="who">企画・開発: ゆうご</p>
+    <p>実装には AI コーディングアシスタント Claude を使用しています。</p>
+    <p>地図・スポットのデータ: © OpenStreetMap contributors、Overture Maps Foundation、Mapzen Terrain Tiles、OpenFreeMap。天気: Open-Meteo（CC BY 4.0）。</p>
+    <p>画面はすべて開発中のものです。数値は 2026年10月20日時点。</p>
+  </footer>
+</div>
+
+</body>
+</html>
