@@ -117,6 +117,10 @@ section.chapter { scroll-margin-top: 16px; display: grid; grid-template-columns:
 .pillar p { font-size: 14.5px; color: var(--soft); line-height: 1.75; }
 .pillar .vs { font-size: 13px; color: var(--ink); border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 4px; }
 
+.story { display: grid; gap: 14px; max-width: 42em; padding-top: 8px; }
+.story h3 { font-size: 18px; }
+.story > p { color: var(--soft); }
+
 /* 仕組み */
 .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
 .steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding-block: 14px; border-bottom: 1px solid var(--line); }
@@ -340,7 +344,7 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
           <p>場所を保存して地図に出すことは無料でできます。ただ、どこからどう撮ればいいかまでは教えてくれません。</p>
         </div>
       </div>
-      <p class="gap-note">どのサービスも「誰かが撮った写真」が出発点です。そのため、写真が投稿されていない場所は、眺めがよくても地図に出てきません。</p>
+      <p class="gap-note">どのサービスも「誰かが撮った写真」が出発点です。そのため、写真が投稿されていない地域ではスポットがほとんど出てきません。海外アプリのレビューにも「住んでいる州にスポットが2件しかない」という不満があり、投稿が集まるまでは地図が空いたままになることが、このジャンル共通の弱点になっています。</p>
     </div>
   </section>
 
@@ -354,7 +358,7 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
       <div class="pillars">
         <div class="pillar">
           <h3>写真がなくても、地形から見つける</h3>
-          <p>標高・建物・道・樹木・水辺のデータから、眺め・桜・森の小道など7つのテーマで候補を自動で出します。選ばれた理由も「西が開けていて夕日向き」のように文章で示します。</p>
+          <p>標高・建物・道・樹木・水辺のデータから、眺め・桜・森の小道など7つのテーマで候補を自動で出します。投稿を待たずに、住宅地や郊外にも最初から候補があります。選ばれた理由も「西が開けていて夕日向き」のように文章で示します。</p>
           <p class="vs">他のアプリ: 投稿された写真が頼り</p>
         </div>
         <div class="pillar">
@@ -367,6 +371,16 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
           <p>ログインも広告もありません。スポットのデータはアプリに入っているので、電波の弱い山や海辺でも探せます。常に動くサーバーを持たない作りにして、運営費を年2〜3万円に抑えます。</p>
           <p class="vs">他のアプリ: 無料版は制限が多い</p>
         </div>
+      </div>
+
+      <div class="story">
+        <h3>近所の、まだ知られていない場所</h3>
+        <p>写真ではなく地形から探すと、有名な撮影地だけでなく、住宅地の中の高台や川沿いの並木のように、これまで撮影地として知られていなかった場所も候補に出てきます。「家の近くにこんな眺めがあったのか」という発見や、混み合う定番を避けた穴場探しに使えるのが、この方式のいちばんの良さだと考えています。</p>
+        <div class="stat">
+          <span class="num">約96%<small>4,383 か所中 4,228 か所</small></span>
+          <p>眺めのテーマで選んだ場所のうち、地図データに展望スポットとして登録された地点から 300m 以上離れている場所の割合です。これまで眺めのいい場所として扱われていなかった場所が、ほとんどを占めています。</p>
+        </div>
+        <p>一方で、計算だけで選ぶので外れもあります。そこで候補には「未確認」と表示し、行った人が「当たり・微妙・外れ」を記録できるようにしました。今後はこの評価を共有して、未確認の候補を確認済みのスポットに育てていく予定です。</p>
       </div>
     </div>
   </section>
