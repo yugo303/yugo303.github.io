@@ -213,8 +213,31 @@ a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
   .features, .stack, .next, .fixes, .roles { grid-template-columns: minmax(0, 1fr); }
   .decisions div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }
+@media (max-width: 600px) {
+  body { font-size: 17px; }
+  .lead { font-size: 17.5px; }
+  .label { font-size: 13px; }
+  .top { font-size: 15px; }
+  .fact { font-size: 15px; }
+  .dial figcaption, .note, .wide figcaption { font-size: 14.5px; }
+  .chapter h2 { font-size: 25px; }
+  .market p, .pillar p, .steps span, .stat p, .fix p, .role p, .decisions dd, .stack dd, .timeline span, .features li span, .next li span { font-size: 15.5px; }
+  .pillar .vs { font-size: 14.5px; }
+  .fix { padding: 16px; }
+  .fix p { grid-template-columns: 2.6em minmax(0, 1fr); }
+  .fix p b { font-size: 12.5px; }
+  .pillar, .stack dl, .toc { padding: 16px; }
+  .phone figcaption { font-size: 15px; }
+  .phone figcaption b, .features li, .next li, .timeline b, .decisions dt, .stack dt, .fix h3, .market h3, .role h3 { font-size: 16.5px; }
+  .toc a { font-size: 16px; }
+  .bar { font-size: 15px; }
+  .bar .n { font-size: 14px; }
+  .stack dd code { font-size: 14px; }
+  .timeline time { font-size: 15px; }
+  footer { font-size: 14.5px; }
+}
 @media (max-width: 420px) {
-  .bar { grid-template-columns: 6.2em minmax(0, 1fr) 3.8em; font-size: 13px; }
+  .bar { grid-template-columns: 6.6em minmax(0, 1fr) 3.8em; font-size: 14.5px; }
   .phones { gap: 20px 12px; }
   .phone .frame { border-width: 4px; border-radius: 16px; }
 }
