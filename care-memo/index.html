@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>介護メモ 制作ポートフォリオ</title>
+<meta name="description" content="ケアマネジャーが訪問先でスマホに話した内容を、AI が支援経過の3つの欄に整え、事業所のパソコンへ QR コードで渡すアプリの制作記録です。">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:title" content="介護メモ 制作ポートフォリオ">
+<meta property="og:description" content="ケアマネジャーが訪問先でスマホに話した内容を、AI が支援経過の3つの欄に整え、事業所のパソコンへ QR コードで渡すアプリの制作記録です。">
+<meta property="og:url" content="https://yugo303.github.io/care-memo/">
+<meta property="og:image" content="https://yugo303.github.io/care-memo/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: フォトスポットと同じ「見出し｜本文」の2カラム章立て。色はアプリそのもの（ボタンの青・案内の黄色・まとめるの緑）、本文は読みやすさ重視のUDゴシック */
+:root {
+  --paper: #F3F5F9;
+  --panel: #FFFFFF;
+  --ink: #1F2933;
+  --muted: #5B6573;
+  --soft: #3C4652;
+  --w-text: 400;
+  --line: #D5DBE3;
+  --blue: #2563EB;
+  --blue-soft: #E7EEFD;
+  --guide: #F59E0B;
+  --guide-soft: #FEF3D7;
+  --green: #16A34A;
+  --f-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "BIZ UDPGothic", sans-serif;
+  --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11161D; --panel: #1A212B; --ink: #F4F6F9; --muted: #AAB5C2; --soft: #E1E6EC; --w-text: 500; --line: #333E4B;
+    --blue: #7AA5FA; --blue-soft: #1D2A44; --guide: #F7B13D; --guide-soft: #3A2D12; --green: #4ACB7C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #11161D; --panel: #1A212B; --ink: #F4F6F9; --muted: #AAB5C2; --soft: #E1E6EC; --w-text: 500; --line: #333E4B;
+  --blue: #7AA5FA; --blue-soft: #1D2A44; --guide: #F7B13D; --guide-soft: #3A2D12; --green: #4ACB7C; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.85; font-weight: var(--w-text);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--blue); }
+.label { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--muted); }
+
+/* 上部バー */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding-block: 20px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.brand { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+.brand:hover { text-decoration: underline; }
+.status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--guide); }
+
+/* ヒーロー */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 44px; align-items: center; padding-block: 56px 48px; }
+.hero h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(34px, 4.8vw, 50px); line-height: 1.3; letter-spacing: 0.04em; }
+.hero h1 small { font-size: 0.4em; font-weight: 500; color: var(--muted); margin-left: 10px; letter-spacing: 0.02em; }
+.lead { margin-top: 20px; font-size: 17px; color: var(--soft); max-width: 34em; }
+.facts { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; background: var(--panel); }
+.fact b { font-family: var(--f-mono); font-weight: 500; }
+
+/* ヒーローの図: 話した言葉 → 3つの欄 */
+.convert { margin: 0; display: grid; gap: 12px; }
+.spoken { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; }
+.spoken .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.rec { display: inline-flex; align-items: center; gap: 6px; }
+.rec::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+.spoken p { font-size: 14.5px; color: var(--soft); line-height: 1.75; }
+.spoken p .um { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--guide); text-decoration-thickness: 2px; }
+.arrowline { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: var(--ink); padding-left: 6px; }
+.arrowline .pill { background: var(--green); color: var(--panel); border-radius: 8px; padding: 4px 12px; }
+.arrowline::before { content: "↓"; font-size: 20px; color: var(--green); line-height: 1; }
+.sections { display: grid; gap: 8px; }
+.sec { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+.sec b { font-size: 14px; }
+.sec span { font-size: 14px; color: var(--soft); line-height: 1.7; }
+.convert figcaption { font-size: 13px; color: var(--soft); }
+@media (prefers-reduced-motion: no-preference) {
+  .sec { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; }
+  .sec:nth-child(2) { animation-delay: .12s; }
+  .sec:nth-child(3) { animation-delay: .24s; }
+  @keyframes rise { from { transform: translateY(8px); opacity: .5; } to { transform: none; opacity: 1; } }
+}
+
+/* 目次 */
+.toc { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 18px 22px; display: grid; gap: 10px; margin-bottom: 48px; scroll-margin-top: 16px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); grid-auto-flow: column; gap: 4px 32px; }
+.toc a { display: grid; grid-template-columns: 2.4em minmax(0, 1fr); padding-block: 6px; color: var(--ink); text-decoration: none; font-size: 15px; border-bottom: 1px solid var(--line); }
+.toc a span { font-family: var(--f-mono); color: var(--blue); font-size: 13px; padding-top: 2px; }
+.toc a:hover { color: var(--blue); }
+.back { font-size: 13px; color: var(--muted); text-decoration: none; margin-top: 4px; }
+.back:hover { color: var(--blue); text-decoration: underline; }
+
+/* 章 */
+section.chapter { scroll-margin-top: 16px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-block: 56px; border-top: 1px solid var(--line); }
+.chapter > header { display: grid; gap: 8px; align-content: start; }
+.chapter h2 { font-family: var(--f-display); font-size: 26px; font-weight: 700; line-height: 1.45; }
+.body { display: grid; gap: 24px; min-width: 0; }
+.body > p { max-width: 40em; }
+.quote { border-left: 4px solid var(--guide); background: var(--guide-soft); border-radius: 0 10px 10px 0; padding: 12px 18px; font-weight: 700; max-width: 40em; }
+.quote small { display: block; font-weight: var(--w-text); font-size: 13px; color: var(--soft); margin-top: 2px; }
+.pivot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: stretch; max-width: 46em; }
+.pivot > div { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; background: var(--panel); }
+.pivot .after { border-color: var(--blue); background: var(--blue-soft); }
+.pivot .to { align-self: center; color: var(--blue); font-size: 22px; border: 0; background: none; padding: 0; }
+.pivot b { font-size: 15.5px; }
+
+/* 3つの方針 */
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pillar { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 8px; align-content: start; }
+.pillar h3 { font-size: 18px; line-height: 1.5; }
+.pillar p { font-size: 14.5px; color: var(--soft); line-height: 1.75; }
+
+/* 仕組み */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.steps li { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.steps .n { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--blue); color: var(--panel); font-weight: 700; font-size: 15px; }
+.steps li:nth-child(2) .n { background: var(--green); }
+.steps b { font-size: 16px; }
+.steps span { color: var(--soft); font-size: 14.5px; line-height: 1.75; }
+.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px; }
+.diagram svg { display: block; min-width: 680px; width: 100%; height: auto; }
+.diagram .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.4; }
+.diagram .box-a { fill: var(--blue-soft); stroke: var(--blue); }
+.diagram .t { fill: var(--ink); font: 700 14px var(--f-body); }
+.diagram .s { fill: var(--soft); font: 400 12px var(--f-body); }
+.diagram .m { fill: var(--muted); font: 400 11px var(--f-mono); }
+.diagram .ln { stroke: var(--blue); stroke-width: 1.8; fill: none; }
+.diagram .ln-q { stroke: var(--guide); stroke-width: 1.8; fill: none; stroke-dasharray: 6 4; }
+.diagram .zone { fill: none; stroke: var(--guide); stroke-width: 1.4; stroke-dasharray: 2 5; }
+.diagram .zt { fill: var(--guide); font: 500 11.5px var(--f-mono); }
+.diagram .ah { fill: var(--blue); }
+.diagram .ahq { fill: var(--guide); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.stat { display: grid; gap: 4px; align-content: start; }
+.stat .num { font-family: var(--f-mono); font-size: 32px; font-weight: 500; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.stat .num small { font-family: var(--f-body); font-size: 15px; color: var(--muted); margin-left: 4px; }
+.stat p { font-size: 13.5px; color: var(--soft); line-height: 1.7; }
+.note { font-size: 12.5px; color: var(--soft); }
+
+/* 工夫 */
+.fixes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.fix { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; background: var(--panel); }
+.fix h3 { font-size: 16px; line-height: 1.5; }
+.fix p { font-size: 14px; line-height: 1.75; color: var(--soft); display: grid; grid-template-columns: 3.2em minmax(0, 1fr); gap: 8px; }
+.fix p b { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--guide); padding-top: 2px; }
+.fix p.fix-a b { color: var(--blue); }
+
+/* 画面 */
+.phones { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px; }
+.phone { margin: 0; display: grid; gap: 10px; align-content: start; }
+.phone .frame { aspect-ratio: 1080 / 2210; max-width: 100%; border-radius: 20px; overflow: hidden; border: 5px solid var(--ink); background: var(--ink); }
+.phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.phone figcaption { font-size: 14px; line-height: 1.65; }
+.phone figcaption b { display: block; font-size: 15px; }
+.phone figcaption span { color: var(--soft); }
+.wide { margin: 0; display: grid; gap: 10px; }
+.wide .scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--line); }
+.wide img { display: block; width: 100%; min-width: 560px; height: auto; }
+.wide figcaption { font-size: 14px; color: var(--soft); }
+
+/* 機能・技術 */
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0; padding: 0; list-style: none; }
+.features li { padding-block: 10px; border-bottom: 1px solid var(--line); font-size: 15px; display: grid; gap: 2px; }
+.features li span { color: var(--soft); font-size: 13.5px; }
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.stack dl { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; }
+.stack dt { font-weight: 700; font-size: 15px; }
+.stack dd { margin: 0; color: var(--soft); font-size: 14px; line-height: 1.75; }
+.stack dd code { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); }
+
+/* 進め方 */
+.roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.role { display: grid; gap: 6px; align-content: start; border-top: 3px solid var(--blue); padding-top: 12px; }
+.role.ai { border-top-color: var(--line); }
+.role h3 { font-size: 16px; }
+.role p { font-size: 14.5px; color: var(--soft); line-height: 1.75; }
+.decisions { margin: 0; display: grid; }
+.decisions div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.decisions dt { font-weight: 700; font-size: 15px; }
+.decisions dd { margin: 0; font-size: 14px; color: var(--soft); line-height: 1.75; }
+
+/* 記録 */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.timeline time { font-family: var(--f-mono); font-size: 14px; color: var(--muted); padding-top: 2px; }
+.timeline li.plan time { color: var(--guide); }
+.timeline li.plan b::after { content: "予定"; margin-left: 8px; font-size: 11.5px; color: var(--guide); border: 1px solid var(--guide); border-radius: 4px; padding: 0 5px; vertical-align: 2px; }
+.timeline b { display: block; font-size: 15px; }
+.timeline span { color: var(--soft); font-size: 14px; }
+.next { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 32px; margin: 0; padding: 0; list-style: none; }
+.next li { font-size: 15px; display: grid; gap: 2px; }
+.next li span { color: var(--soft); font-size: 13.5px; }
+
+footer { border-top: 1px solid var(--line); padding-block: 32px 48px; display: grid; gap: 10px; font-size: 13px; color: var(--soft); }
+footer .who { font-size: 15px; color: var(--ink); }
+a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+@media (max-width: 960px) {
+  .phones { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 36px 32px; gap: 28px; }
+  .back { display: none; }
+  section.chapter { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 40px; }
+  .pillars, .steps, .stats, .toc ol { grid-template-columns: minmax(0, 1fr); }
+  .toc ol { grid-template-rows: none; grid-auto-flow: row; }
+  .phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .features, .stack, .next, .fixes, .roles { grid-template-columns: minmax(0, 1fr); }
+  .decisions div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .pivot { grid-template-columns: minmax(0, 1fr); }
+  .pivot .to { transform: rotate(90deg); justify-self: center; }
+}
+@media (max-width: 600px) {
+  body { font-size: 17px; }
+  .lead { font-size: 17.5px; }
+  .label { font-size: 13px; }
+  .top { font-size: 15px; }
+  .fact { font-size: 15px; }
+  .spoken p, .sec span, .sec b { font-size: 15.5px; }
+  .convert figcaption, .note, .wide figcaption { font-size: 14.5px; }
+  .chapter h2 { font-size: 25px; }
+  .pillar p, .steps span, .stat p, .fix p, .role p, .decisions dd, .stack dd, .timeline span, .features li span, .next li span { font-size: 15.5px; }
+  .fix { padding: 16px; }
+  .fix p { grid-template-columns: 2.6em minmax(0, 1fr); }
+  .fix p b { font-size: 12.5px; }
+  .pillar, .stack dl, .toc { padding: 16px; }
+  .phone figcaption { font-size: 15px; }
+  .phone figcaption b, .features li, .next li, .timeline b, .decisions dt, .stack dt, .fix h3, .role h3, .steps b, .pivot b { font-size: 16.5px; }
+  .toc a { font-size: 16px; }
+  .stack dd code { font-size: 14px; }
+  .timeline time { font-size: 15px; }
+  .timeline li { grid-template-columns: 5.6em minmax(0, 1fr); gap: 12px; }
+  .quote small { font-size: 14.5px; }
+  footer { font-size: 14.5px; }
+}
+@media (max-width: 420px) {
+  .phones { gap: 20px 12px; }
+  .phone .frame { border-width: 4px; border-radius: 16px; }
+}
+</style>
+
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="https://yugo303.github.io/">yugo303 ポートフォリオ</a>
+    <span class="status">現役ケアマネジャーに試してもらう準備中</span>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="label">個人開発 / スマホ向けウェブアプリ / 2026年7月〜</p>
+      <h1 style="margin-top: 14px;">介護メモ<small>ケアマネジャー向け</small></h1>
+      <p class="lead">ケアマネジャーが訪問先や移動中にスマホへ話した内容を、AI が支援経過の3つの欄に整え、事業所のパソコンへ QR コードで渡すアプリです。事業所で使っている介護ソフト「ほのぼの」はそのまま使い、外で動くケアマネと事業所のあいだをつなぐ役目にしぼりました。</p>
+      <div class="facts">
+        <span class="fact">AI のまとめ 1回 <b>約0.3〜0.5</b> 円</span>
+        <span class="fact">サーバーに記録を残さない</span>
+        <span class="fact">インストール不要</span>
+      </div>
+    </div>
+    <figure class="convert">
+      <div class="spoken">
+        <div class="head"><span class="rec">話した言葉</span><span class="label">176文字</span></div>
+        <p><span class="um">えっと</span>腰の痛みが続いていて夜中に目が覚めることがあると話していた 買い物に行くのがつらくなってきたとのこと 室内を歩くときに少しふらつきがあった 玄関の段差で…</p>
+      </div>
+      <div class="arrowline"><span class="pill">記録の形にまとめる</span></div>
+      <div class="sections">
+        <div class="sec"><b>【本人の様子・主訴】</b><span>腰の痛みが続いており、夜中に目が覚めることがあると話す。</span></div>
+        <div class="sec"><b>【事実・対応】</b><span>室内の歩行時にふらつきが見られた。手すりの設置と歩行器の利用について説明。</span></div>
+        <div class="sec"><b>【特記事項・方針】</b><span>次回の訪問までに福祉用具事業所へ見積もりを依頼する。</span></div>
+      </div>
+      <figcaption>話し言葉のメモが、ほのぼのの支援経過に写しやすい3つの欄になります。内容は説明用の架空の例です。</figcaption>
+    </figure>
+  </header>
+
+  <nav class="toc" id="toc" aria-label="目次">
+    <span class="label">目次</span>
+    <ol>
+      <li><a href="#problem"><span>01</span>現場で足りなかったこと</a></li>
+      <li><a href="#approach"><span>02</span>3つの方針</a></li>
+      <li><a href="#how"><span>03</span>使い方と仕組み</a></li>
+      <li><a href="#craft"><span>04</span>工夫したところ</a></li>
+      <li><a href="#screens"><span>05</span>主な画面</a></li>
+      <li><a href="#features"><span>06</span>機能</a></li>
+      <li><a href="#tech"><span>07</span>技術と構成</a></li>
+      <li><a href="#process"><span>08</span>開発の進め方</a></li>
+      <li><a href="#log"><span>09</span>制作の記録</a></li>
+      <li><a href="#next"><span>10</span>これから</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="problem">
+    <header>
+      <span class="label">01</span>
+      <h2>現場で足りなかったこと</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>介護の業界は IT の活用が遅れていると感じていました。介護士に比べて注目されにくいケアマネジャーの仕事に課題があるのではと考え、現役のケアマネジャーに業務の流れと困りごとを聞きました。</p>
+      <p>ケアマネジャーは利用者のお宅で聞いた内容を、事業所に戻ってから介護ソフトの支援経過に書き起こします。ほのぼのには外出先で使えるオプションがありますが追加の料金がかかり、事業所の費用の面から導入できないことがあります。そのため、メモと記憶を頼りに、戻ってからまとめて入力することになります。</p>
+      <div class="quote">完成したソフトでも、現場の人が使えて初めて意味がある。<small>インタビューから得た気づき</small></div>
+      <p>話を聞くと、似た機能のソフトはすでに市場にあることも分かりました。足りないのは機能ではなく、事業所に新しい仕組みを入れる余力（お金・手間・慣れ）でした。そこで方針を変えました。</p>
+      <div class="pivot">
+        <div><span class="label">最初の考え</span><b>新しい技術や AI を使った便利なソフトを作って渡す</b></div>
+        <div class="to" aria-hidden="true">→</div>
+        <div class="after"><span class="label">変えたあと</span><b>導入の余力がない事業所でも、今の仕事にそのまま足せるものを作る</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="approach">
+    <header>
+      <span class="label">02</span>
+      <h2>3つの方針</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <div class="pillars">
+        <div class="pillar">
+          <h3>ほのぼのの代わりにしない</h3>
+          <p>事業所の介護ソフトはそのまま使い続けられるようにし、このアプリは「外で話したことを事業所に届ける」だけにしました。パソコン側に必要なのはブラウザとカメラだけです。</p>
+        </div>
+        <div class="pillar">
+          <h3>記録をサーバーに残さない</h3>
+          <p>利用者の個人情報を扱うので、音声や記録はサーバーに保存せず、まとめ終わったら捨てる作りにしました。下書きはスマホの中だけに残ります。ログインもありません。</p>
+        </div>
+        <div class="pillar">
+          <h3>AI を使ったことがない人でも迷わない</h3>
+          <p>使う人はデジタルに慣れていない年配の方が多いと考え、カタカナや IT の言葉を避け、次にどこを押すかを画面がいつも教えるようにしました。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="how">
+    <header>
+      <span class="label">03</span>
+      <h2>使い方と仕組み</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <ol class="steps">
+        <li><span class="n">1</span><b>話す</b><span>青いボタンを押して話すと、その場で文字になります。途中で画面を閉じても消えません。</span></li>
+        <li><span class="n">2</span><b>まとめる</b><span>緑のボタンで、AI が「本人の様子・主訴／事実・対応／特記事項・方針」の3つに整えます。各欄は手で直せます。</span></li>
+        <li><span class="n">3</span><b>パソコンへ</b><span>スマホに出た QR コードを事業所のパソコンのカメラで読み取り、1欄ずつコピーしてほのぼのに貼ります。</span></li>
+      </ol>
+
+      <div class="diagram" role="img" aria-label="仕組みの図。スマホで話した文字をAWSのAPI GatewayとLambdaに送り、Amazon BedrockのClaude Haikuが3つの欄に整えて返す。結果はQRコードで事業所のパソコンに渡し、ほのぼのに貼り付ける。サーバーには記録を保存しない。">
+        <svg viewBox="0 0 760 250">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 Z"></path></marker>
+            <marker id="ahq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ahq" d="M0,0 L10,5 L0,10 Z"></path></marker>
+          </defs>
+          <rect class="zone" x="250" y="14" width="494" height="104" rx="12"></rect>
+          <text class="zt" x="262" y="34">AWS / 記録は保存しない</text>
+          <rect class="box box-a" x="16" y="44" width="190" height="74" rx="10"></rect>
+          <text class="t" x="32" y="72">スマホ（訪問先）</text>
+          <text class="s" x="32" y="92">話す → 文字にする</text>
+          <text class="m" x="32" y="108">Web Speech API</text>
+          <rect class="box" x="270" y="48" width="200" height="60" rx="10"></rect>
+          <text class="t" x="286" y="74">API Gateway + Lambda</text>
+          <text class="m" x="286" y="94">POST /format · Node.js</text>
+          <rect class="box" x="530" y="48" width="200" height="60" rx="10"></rect>
+          <text class="t" x="546" y="74">Amazon Bedrock</text>
+          <text class="m" x="546" y="94">Claude Haiku 4.5</text>
+          <path class="ln" d="M206,70 L268,70" marker-end="url(#ah)"></path>
+          <path class="ln" d="M268,92 L206,92" marker-end="url(#ah)"></path>
+          <path class="ln" d="M470,70 L528,70" marker-end="url(#ah)"></path>
+          <path class="ln" d="M528,90 L470,90" marker-end="url(#ah)"></path>
+          <text class="m" x="212" y="64">文字</text>
+          <text class="m" x="212" y="108">3つの欄</text>
+          <rect class="box" x="16" y="164" width="190" height="66" rx="10"></rect>
+          <text class="t" x="32" y="190">QR コード</text>
+          <text class="s" x="32" y="210">スマホの画面に出すだけ</text>
+          <rect class="box" x="270" y="164" width="200" height="66" rx="10"></rect>
+          <text class="t" x="286" y="190">事業所のパソコン</text>
+          <text class="s" x="286" y="210">カメラで読み取る画面</text>
+          <rect class="box box-a" x="530" y="164" width="200" height="66" rx="10"></rect>
+          <text class="t" x="546" y="190">ほのぼの</text>
+          <text class="s" x="546" y="210">支援経過に貼り付け</text>
+          <path class="ln-q" d="M111,118 L111,162" marker-end="url(#ahq)"></path>
+          <path class="ln-q" d="M206,197 L268,197" marker-end="url(#ahq)"></path>
+          <path class="ln-q" d="M470,197 L528,197" marker-end="url(#ahq)"></path>
+        </svg>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="num">約0.3〜0.5<small>円 / 1回</small></span>
+          <p>AI でまとめる1回あたりの費用です。軽くて安いモデルを選び、呼ばれたときだけ動く仕組みにしました。</p>
+        </div>
+        <div class="stat">
+          <span class="num">0<small>件</small></span>
+          <p>サーバーに保存する記録の数です。データベースは持たず、まとめた結果は返したら残しません。</p>
+        </div>
+        <div class="stat">
+          <span class="num">2<small>画面</small></span>
+          <p>スマホ用と、パソコンで受け取る用の2つだけです。事業所でソフトを入れる必要はありません。</p>
+        </div>
+      </div>
+      <p class="note">スマホとパソコンはネットワークでつながず、QR コードを画面に映すだけで受け渡します。事業所のネットワークの設定を変えずに使えるようにするためです。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="craft">
+    <header>
+      <span class="label">04</span>
+      <h2>工夫したところ</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <div class="fixes">
+        <div class="fix">
+          <h3>言葉が難しい</h3>
+          <p><b>課題</b><span>「整形」「認識」「エラー」のような言葉や、ファイル名がそのまま画面に出ていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>「録音は止まっています」「記録の形にまとめる」のように、そのまま行動につながる言い方に書き直しました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>次にどこを押すか迷う</h3>
+          <p><b>課題</b><span>機能は動いても、初めての人には何から始めて、どこで終わるのかが分かりにくい画面でした。</span></p>
+          <p class="fix-a"><b>対応</b><span>「① 話す → ② まとめる → ③ パソコンへ」を上にいつも出し、次に押すボタンを黄色の吹き出しで示すようにしました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>録音を止めたあと手が止まる</h3>
+          <p><b>課題</b><span>話し終わったあと、まとめるボタンまでたどり着かずに終わってしまうことが考えられました。</span></p>
+          <p class="fix-a"><b>対応</b><span>録音を止めて8秒たつと「まとめますか？」とふきだしで聞くようにしました。すぐ出すと話の途中で邪魔になるので、間をとっています。</span></p>
+        </div>
+        <div class="fix">
+          <h3>長く話すと途中で切れる</h3>
+          <p><b>課題</b><span>スマホの音声入力は、しばらく話すと勝手に止まります。画面が暗くなっても止まります。</span></p>
+          <p class="fix-a"><b>対応</b><span>切れたら自動でつなぎ直し、文字は随時スマホに保存するようにしました。録音中は画面が暗くならないようにしています。</span></p>
+        </div>
+        <div class="fix">
+          <h3>QR コードで日本語が化ける</h3>
+          <p><b>課題</b><span>日本語をそのまま QR コードにすると、パソコン側で読み取ったときに文字が化けることがありました。</span></p>
+          <p class="fix-a"><b>対応</b><span>文字を英数字の形（Base64）に変えてから QR コードにし、受け取る画面で元に戻すようにしました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>直しても画面が新しくならない</h3>
+          <p><b>課題</b><span>ホーム画面に追加したアプリが古い画面を覚えていて、改良がなかなか届きませんでした。</span></p>
+          <p class="fix-a"><b>対応</b><span>画面は毎回ネットから取り、つながらないときだけ保存しておいた画面を出すようにしました。</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="screens">
+    <header>
+      <span class="label">05</span>
+      <h2>主な画面</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p class="note">実機（Android）の画面です。記録の内容は説明用の架空の例です。</p>
+      <div class="phones">
+        <figure class="phone">
+          <div class="frame"><img src="img/start.webp" alt="最初の画面。①話す ②まとめる ③パソコンへ の表示と、青い録音ボタンの上に「まずは、ここを押して話す」の案内" loading="lazy"></div>
+          <figcaption><b>最初の画面</b><span>次に押すボタンを黄色の案内で示します。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/talk.webp" alt="話した言葉が文字になった欄と、「話し終わりましたか？記録の形にまとめますか？」のふきだし" loading="lazy"></div>
+          <figcaption><b>話す</b><span>録音を止めて8秒たつと、まとめるかを聞きます。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/result.webp" alt="本人の様子・主訴、事実・対応の欄に整った文章と、欄ごとのコピーボタン" loading="lazy"></div>
+          <figcaption><b>まとめた結果</b><span>3つの欄に箇条書きで整います。手で直すこともできます。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/qr.webp" alt="パソコンへ送るための大きな QR コード" loading="lazy"></div>
+          <figcaption><b>パソコンへ送る</b><span>事業所のパソコンのカメラに向けるだけです。</span></figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="frame"><img src="img/tutorial3.webp" alt="使い方の3枚目。「終わったらここ！」の赤いボタンと緑のまとめるボタンを指のアニメーションで示す" loading="lazy"></div>
+          <figcaption><b>使い方</b><span>初めて開いたときに、指のアニメーションつきで4枚見せます。</span></figcaption>
+        </figure>
+      </div>
+      <figure class="wide">
+        <div class="scroll"><img src="img/pc.webp" alt="パソコンの受け取り画面。QRコードを読み取った結果が欄ごとに表示され、コピーボタンが並ぶ" loading="lazy"></div>
+        <figcaption>パソコンの受け取り画面（パソコン上で再現したもの）。読み取ると欄ごとに分かれ、「コピー」を押してほのぼのに貼り付けます。貼り付け方（Ctrl を押しながら V）も画面に書いてあります。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="chapter" id="features">
+    <header>
+      <span class="label">06</span>
+      <h2>機能</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <ul class="features">
+        <li>長い時間の音声入力<span>切れても自動で再開、文字数と録音時間の表示</span></li>
+        <li>下書きの自動保存<span>画面を閉じても、話した内容とまとめた結果が残る</span></li>
+        <li>AI で3つの欄にまとめる<span>本人の様子・主訴／事実・対応／特記事項・方針</span></li>
+        <li>結果を手で直せる<span>直した内容は QR コードにも反映</span></li>
+        <li>QR コードでパソコンへ<span>パソコン側は受け取り用の画面を開くだけ</span></li>
+        <li>欄ごとのコピー<span>スマホでもパソコンでも1欄ずつコピー</span></li>
+        <li>案内とふきだし<span>次に押すボタンの表示、録音停止後の声かけ</span></li>
+        <li>使い方の説明<span>初回に自動で表示、「使い方」ボタンでいつでも見直せる</span></li>
+        <li>ホーム画面に追加<span>アプリのように起動でき、画面が暗くならない</span></li>
+        <li>やさしいお知らせ<span>電波がないときなど、次にどうすればよいかを伝える</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="tech">
+    <header>
+      <span class="label">07</span>
+      <h2>技術と構成</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>現場のスマホは機種もブラウザもさまざまなので、フレームワークを使わず、画面ごとに1つのファイルで動くようにしています。サーバーは呼ばれたときだけ動く仕組みにして、使わない月の費用がほとんどかからないようにしました。</p>
+      <div class="stack">
+        <dl>
+          <dt>スマホの画面</dt>
+          <dd><code>HTML / CSS / JavaScript</code> の1ファイル。音声入力は <code>Web Speech API</code>、画面を暗くしないのは <code>Screen Wake Lock API</code>、QR コードは <code>qrcode-generator</code> です。</dd>
+          <dt>アプリとして使う</dt>
+          <dd><code>manifest.json</code> と <code>Service Worker</code> でホーム画面に追加できる PWA にしています。公開は <code>Vercel</code> です。</dd>
+        </dl>
+        <dl>
+          <dt>AI でまとめる</dt>
+          <dd><code>AWS Lambda</code>（Node.js）と <code>API Gateway</code> の HTTP API で受け、<code>Amazon Bedrock</code> の <code>Claude Haiku 4.5</code> で3つの欄に整えます。</dd>
+          <dt>パソコンの受け取り画面</dt>
+          <dd><code>html5-qrcode</code> でパソコンのカメラから QR コードを読み取り、欄ごとに分けて表示します。</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="process">
+    <header>
+      <span class="label">08</span>
+      <h2>開発の進め方</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>最初の試作は AI の Gemini に相談しながら作り、2026年10月からは AI コーディングアシスタントの Claude で改良を続けています。変更はプルリクエストで受け取り、スマホの実機で確かめてから取り込んでいます。</p>
+      <div class="roles">
+        <div class="role">
+          <h3>自分が担当したこと</h3>
+          <p>現場の課題探しとケアマネジャーへのインタビュー、何を作り何を作らないかの決定、AWS の構成と構築（API Gateway・Lambda・Bedrock の設定）、使う人を考えた言葉や導線の指摘、実機での動作確認、変更を取り込むかどうかの判断を担当しました。</p>
+        </div>
+        <div class="role ai">
+          <h3>AI に任せたこと</h3>
+          <p>画面のコードの実装と作り直し、使い方の説明のアニメーション、不具合の原因の調査を任せました。出てきた案を採用するかどうかは、自分で決めています。</p>
+        </div>
+      </div>
+      <dl class="decisions">
+        <div><dt>ほのぼのとの自動連携を作らなかった</dt><dd>連携には事業所側の設定や費用が必要になり、「導入の余力がない」という本当の課題に逆らうためです。コピーと貼り付けで済む形にしました。</dd></div>
+        <div><dt>利用者ごとの記録の管理を持たなかった</dt><dd>個人情報を保存すると、管理の責任と導入のハードルが上がります。記録を書く手間を減らす一点にしぼりました。</dd></div>
+        <div><dt>録音停止の8秒後に「まとめますか？」と聞く</dt><dd>自分で出した案です。最初はもう少し長い間でしたが、8秒に縮めました。表示のときに画面が勝手に動かないようにもしています。</dd></div>
+        <div><dt>メールで送るボタンは見送った</dt><dd>共有の手段としてワンボタンのメール送信も考えましたが、まずは QR コードでの受け渡しを使いやすくすることを優先しました。</dd></div>
+        <div><dt>文字は大きく、言葉はやさしく</dt><dd>使う人はデジタルに慣れていない年配の方が多いと考え、本文は17px 以上、ボタンは大きく、「パソコン」のように普段の言葉を使うことにしました。</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="chapter" id="log">
+    <header>
+      <span class="label">09</span>
+      <h2>制作の記録</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <ol class="timeline">
+        <li><time>2026/07/25</time><div><b>音声で下書きする最初の版</b><span>スマホに話した言葉を文字にして残すところから始めました。</span></div></li>
+        <li><time>07/30</time><div><b>AI でまとめるボタンを追加</b><span>自分で組んだ AWS の仕組みにつなぎ、3つの欄に整えて、欄ごとにコピーできるようにしました。</span></div></li>
+        <li><time>08/23</time><div><b>QR コードでパソコンへ</b><span>パソコンの受け取り画面を作り、日本語が化ける問題を直しました。ホーム画面に追加できるようにもしました。</span></div></li>
+        <li><time>10/20</time><div><b>使う人に合わせて画面を作り直す</b><span>3ステップの表示、やさしい言葉、使い方の説明、8秒後のふきだし、アイコンの作り直しをしました。</span></div></li>
+        <li class="plan"><time>これから</time><div><b>現場で試してもらう</b><span>インタビューに協力してくれたケアマネジャーに、実際の訪問で使ってもらう予定です。</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="chapter" id="next">
+    <header>
+      <span class="label">10</span>
+      <h2>これから</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <ul class="next">
+        <li>現場での試用<span>実際の訪問で使ってもらい、迷ったところを直す</span></li>
+        <li>受け渡しの手段を増やす<span>メールでの送信などを、必要に応じて検討する</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p class="who">企画・開発: yugo303</p>
+    <p>実装には AI の Gemini と、AI コーディングアシスタント Claude を使用しています。</p>
+    <p>AI によるまとめ: Amazon Bedrock（Anthropic Claude Haiku 4.5）。「ほのぼの」は NDソフトウェア株式会社の介護ソフトです。</p>
+    <p>画面はすべて開発中のもので、記録の内容は架空の例です。費用は 2026年10月時点の目安です。</p>
+  </footer>
+</div>
+
+</body>
+</html>
