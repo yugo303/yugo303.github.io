@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>共有されたスポット | フォトスポット</title>
-<meta name="description" content="フォトスポットで共有された撮影スポットです。地図で場所を確かめたり、アプリで開いたりできます。">
+<title>共有されたスポット | 撮りの目</title>
+<link rel="icon" href="icon.png">
+<meta name="description" content="撮りの目で共有された撮影スポットです。地図で場所を確かめたり、アプリで開いたりできます。">
 <meta name="robots" content="noindex">
 <meta property="og:type" content="website">
-<meta property="og:title" content="フォトスポットで撮影スポットが共有されました">
+<meta property="og:title" content="撮りの目で撮影スポットが共有されました">
 <meta property="og:description" content="押すと地図で場所を確かめたり、アプリで開いたりできます。">
 <meta property="og:image" content="https://yugo303.github.io/photospot/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -42,7 +43,7 @@ body {
 }
 .wrap { max-width: 560px; margin: 0 auto; }
 header { display: flex; align-items: center; gap: 8px; padding: 18px 0 14px; font-weight: 700; color: var(--soft); font-size: 14px; }
-header .dot { width: 22px; height: 22px; border-radius: 7px; background: var(--sun); display: grid; place-items: center; color: var(--sun-ink); }
+header .icon { width: 24px; height: 24px; border-radius: 7px; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
 .head { padding: 20px 20px 16px; }
 .kicker { margin: 0 0 4px; font-size: 13px; color: var(--muted); }
@@ -65,7 +66,7 @@ h1 svg { flex: none; margin-top: 4px; color: var(--sun); }
 </head>
 <body>
 <div class="wrap">
-  <header><span class="dot" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"/></svg></span>フォトスポット</header>
+  <header><img class="icon" src="icon.png" alt="" width="24" height="24">撮りの目</header>
 
   <main class="card" id="spot" hidden>
     <div class="head">
@@ -87,7 +88,7 @@ h1 svg { flex: none; margin-top: 4px; color: var(--sun); }
   </main>
 
   <section class="about">
-    <p><strong>フォトスポット</strong>は、地形と地図のデータから景色のいい場所を見つけて、スマホでの撮り方まで教えるアプリです。</p>
+    <p><strong>撮りの目</strong>（とりのめ）は、地形と地図のデータから景色のいい場所を見つけて、スマホでの撮り方まで教えるアプリです。</p>
     <p id="store">Android 版は近日公開予定です。<a href="/photospot/">アプリについて</a></p>
   </section>
 </div>
@@ -111,7 +112,7 @@ h1 svg { flex: none; margin-top: 4px; color: var(--sun); }
   var area = (q.get('a') || '').slice(0, 80);
   document.getElementById('name').textContent = name;
   document.getElementById('area').textContent = area;
-  document.title = name + ' | フォトスポット';
+  document.title = name + ' | 撮りの目';
 
   var d = 0.004;
   var bbox = [lon - d * 1.4, lat - d, lon + d * 1.4, lat + d].map(function (x) { return x.toFixed(5); }).join(',');
