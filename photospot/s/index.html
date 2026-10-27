@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>共有されたスポット | フォトスポット</title>
+<meta name="description" content="フォトスポットで共有された撮影スポットです。地図で場所を確かめたり、アプリで開いたりできます。">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:title" content="フォトスポットで撮影スポットが共有されました">
+<meta property="og:description" content="押すと地図で場所を確かめたり、アプリで開いたりできます。">
+<meta property="og:image" content="https://yugo303.github.io/photospot/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* アプリの共有リンク（https://yugo303.github.io/photospot/s/?id=…&n=…&a=…&lat=…&lon=…）を開いたときのページ。
+   アプリが入っている Android では、このリンクはアプリが直接開く（/.well-known/assetlinks.json）。
+   ここに来るのはアプリが無い人、または LINE などのアプリ内ブラウザで開いた人 */
+:root {
+  --paper: #F2F5F8; --panel: #FFFFFF; --ink: #15202B; --muted: #5A6877; --soft: #3D4956; --line: #D6DDE4;
+  --sun: #E8660F; --sun-ink: #FFFFFF; --sea: #1C6FB8;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12181F; --panel: #1C252F; --ink: #F4F6F8; --muted: #AEBBC7; --soft: #DCE3EA; --line: #374452;
+    --sun: #FF8E42; --sun-ink: #1A1A1A; --sea: #5AA6E8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #12181F; --panel: #1C252F; --ink: #F4F6F8; --muted: #AEBBC7; --soft: #DCE3EA; --line: #374452;
+  --sun: #FF8E42; --sun-ink: #1A1A1A; --sea: #5AA6E8; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.7;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 560px; margin: 0 auto; }
+header { display: flex; align-items: center; gap: 8px; padding: 18px 0 14px; font-weight: 700; color: var(--soft); font-size: 14px; }
+header .dot { width: 22px; height: 22px; border-radius: 7px; background: var(--sun); display: grid; place-items: center; color: var(--sun-ink); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.head { padding: 20px 20px 16px; }
+.kicker { margin: 0 0 4px; font-size: 13px; color: var(--muted); }
+h1 { margin: 0; font-size: 24px; line-height: 1.35; text-wrap: balance; display: flex; gap: 6px; align-items: flex-start; }
+h1 svg { flex: none; margin-top: 4px; color: var(--sun); }
+.area { margin: 6px 0 0 28px; color: var(--soft); font-size: 15px; }
+.map { display: block; width: 100%; aspect-ratio: 4 / 3; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--line); }
+.credit { margin: 6px 20px 0; font-size: 11px; color: var(--muted); text-align: right; }
+.credit a { color: inherit; }
+.actions { display: grid; gap: 10px; padding: 16px 20px 20px; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px; font-weight: 700; font-size: 16px; text-decoration: none; border: 1px solid var(--line); color: var(--ink); background: transparent; }
+.btn.primary { background: var(--sun); border-color: var(--sun); color: var(--sun-ink); }
+.about { margin-top: 18px; padding: 16px 18px; border-radius: 14px; border: 1px dashed var(--line); color: var(--soft); font-size: 14px; }
+.about p { margin: 0; }
+.about p + p { margin-top: 6px; }
+.about a { color: var(--sea); }
+.error { padding: 28px 20px; text-align: center; color: var(--soft); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="dot" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z"/></svg></span>フォトスポット</header>
+
+  <main class="card" id="spot" hidden>
+    <div class="head">
+      <p class="kicker">撮影スポットが共有されました</p>
+      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span id="name"></span></h1>
+      <p class="area" id="area"></p>
+    </div>
+    <iframe class="map" id="map" title="スポットの地図" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    <p class="credit">地図 &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
+    <div class="actions">
+      <a class="btn primary" id="open-app">アプリで開く</a>
+      <a class="btn" id="open-maps" target="_blank" rel="noopener">Google マップで開く</a>
+      <a class="btn" id="open-route" target="_blank" rel="noopener">ここまでの経路を調べる</a>
+    </div>
+  </main>
+
+  <main class="card" id="bad" hidden>
+    <p class="error">リンクが途中で切れているようです。<br>送ってくれた人に、もう一度共有してもらってください。</p>
+  </main>
+
+  <section class="about">
+    <p><strong>フォトスポット</strong>は、地形と地図のデータから景色のいい場所を見つけて、スマホでの撮り方まで教えるアプリです。</p>
+    <p id="store">Android 版は近日公開予定です。<a href="/photospot/">アプリについて</a></p>
+  </section>
+</div>
+<script>
+(function () {
+  var PACKAGE = 'com.yugo303.photospot';
+  // ストアに出したら Google Play の URL を入れる（入っていれば「近日公開」の代わりにストアへのリンクを出す）
+  var PLAY_URL = '';
+
+  var q = new URLSearchParams(location.search);
+  var id = q.get('id') || '';
+  var lat = parseFloat(q.get('lat'));
+  var lon = parseFloat(q.get('lon'));
+  var ok = /^[A-Za-z0-9_-]{1,64}$/.test(id) && isFinite(lat) && isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+  if (!ok) {
+    document.getElementById('bad').hidden = false;
+    return;
+  }
+
+  var name = (q.get('n') || '撮影スポット').slice(0, 80);
+  var area = (q.get('a') || '').slice(0, 80);
+  document.getElementById('name').textContent = name;
+  document.getElementById('area').textContent = area;
+  document.title = name + ' | フォトスポット';
+
+  var d = 0.004;
+  var bbox = [lon - d * 1.4, lat - d, lon + d * 1.4, lat + d].map(function (x) { return x.toFixed(5); }).join(',');
+  document.getElementById('map').src =
+    'https://www.openstreetmap.org/export/embed.html?bbox=' + bbox + '&layer=mapnik&marker=' + lat + ',' + lon;
+
+  var point = lat + ',' + lon;
+  document.getElementById('open-maps').href = 'https://www.google.com/maps/search/?api=1&query=' + point;
+  document.getElementById('open-route').href = 'https://www.google.com/maps/dir/?api=1&destination=' + point;
+
+  // Android は intent:// で開く。アプリが無いときは、ストアに出す前はこのページに留まり、出したあとはストアへ案内される。
+  // iPhone はアプリのスキームで開く
+  var android = /Android/i.test(navigator.userAgent);
+  var fallback = PLAY_URL ? '' : 'S.browser_fallback_url=' + encodeURIComponent(location.href) + ';';
+  document.getElementById('open-app').href = android
+    ? 'intent://spot/' + id + '#Intent;scheme=photospot;package=' + PACKAGE + ';' + fallback + 'end'
+    : 'photospot://spot/' + id;
+
+  if (PLAY_URL) {
+    var store = document.getElementById('store');
+    store.textContent = '';
+    var a = document.createElement('a');
+    a.href = PLAY_URL;
+    a.textContent = 'Google Play で手に入れる';
+    store.appendChild(a);
+  }
+
+  document.getElementById('spot').hidden = false;
+})();
+</script>
+</body>
+</html>

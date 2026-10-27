@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yugo303.photospot",
+      "sha256_cert_fingerprints": [
+        "61:B1:99:5E:B5:B6:42:F8:CA:29:DF:AD:4C:65:E6:48:D8:23:39:4E:C3:15:04:70:11:67:69:6B:EB:A2:9E:1E"
+      ]
+    }
+  }
+]
