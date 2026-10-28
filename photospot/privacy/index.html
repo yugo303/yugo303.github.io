@@ -70,6 +70,7 @@ nav.links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 18px; fon
 <p>・通知：お知らせは端末の中で予約するローカル通知で、運営者のサーバーは使いません。</p>
 <h2>2. 外部のサービスに送られる情報</h2>
 <p>・地図の表示：地図の画像を地図配信サービス（OpenFreeMap）から読み込みます。その際、通信の仕組み上、端末の IP アドレスと表示している範囲が配信元に伝わります。</p>
+<p>・地域データ：アプリに入っていない県のスポットを利用者がダウンロードするときと、配信している地域と新しい版の有無を確かめるとき（1日に1回程度）に、配信元（GitHub Pages の yugo303.github.io）からファイルを読み込みます。その際、通信の仕組み上、端末の IP アドレスが配信元に伝わります。現在地は送りません。</p>
 <p>・天気予報：スポットの詳細を開いたとき、そのスポットの緯度と経度を天気予報サービス（Open-Meteo）に送ります。送るのはスポットの位置で、利用者の現在地ではありません。</p>
 <p>・共有：利用者が共有のボタンを押したときに、写真やスポットの名前と位置が、選んだアプリ（Instagram、LINE、Google マップなど）に渡ります。共有リンクのページ（yugo303.github.io）を開くと、ページの配信元（GitHub）と地図の配信元（OpenStreetMap）に通信が発生します。各サービスでの扱いは、それぞれのプライバシーポリシーに従います。</p>
 <p>・お問い合わせとスポットの報告：利用者がメールアプリから送るメールには、メールアドレス、本文、本アプリの版、端末の機種と OS の版が含まれます。</p>
@@ -86,7 +87,7 @@ nav.links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 18px; fon
 <p>運営者：yugo303</p>
 <p>メール：<a href="mailto:yugo303.dev@gmail.com">yugo303.dev@gmail.com</a></p>
 <p>本アプリの設定画面の「お問い合わせ」からも送れます。</p>
-<p class="date">2026年10月27日 制定</p>
+<p class="date">2026年10月29日 制定</p>
 </main>
 <nav class="links">
   <a href="https://yugo303.github.io/photospot/support/">サポート</a>
