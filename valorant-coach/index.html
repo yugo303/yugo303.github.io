@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VALORANT 振り返りコーチ 制作ポートフォリオ</title>
+<meta name="description" content="VALORANT の試合映像から、ラウンドごとの勝率の動きと不利になった理由を言葉で返す、個人開発の Windows アプリの制作記録です。">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VALORANT 振り返りコーチ 制作ポートフォリオ">
+<meta property="og:description" content="VALORANT の試合映像から、ラウンドごとの勝率の動きと不利になった理由を言葉で返す、個人開発の Windows アプリの制作記録です。">
+<meta property="og:url" content="https://yugo303.github.io/valorant-coach/">
+<meta property="og:image" content="https://yugo303.github.io/valorant-coach/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ほかの紹介ページと同じ「見出し｜本文」の2カラム章立て。色はアプリの図と同じ攻撃の赤・防衛の水色、本文は落ち着いたゴシック、数字は等幅 */
+:root {
+  --paper: #F2F4F7;
+  --panel: #FFFFFF;
+  --ink: #1A2029;
+  --muted: #5A6472;
+  --soft: #39424E;
+  --w-text: 400;
+  --line: #D4DAE2;
+  --atk: #E03A49;
+  --atk-soft: #FCE7E9;
+  --def: #128C83;
+  --def-soft: #DDF3F1;
+  --f-display: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-body: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10141A; --panel: #19202A; --ink: #F5F7FA; --muted: #AEB8C4; --soft: #E3E8EE; --w-text: 500; --line: #313C49;
+    --atk: #FF6B78; --atk-soft: #3A1C21; --def: #4FD1C5; --def-soft: #123230; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10141A; --panel: #19202A; --ink: #F5F7FA; --muted: #AEB8C4; --soft: #E3E8EE; --w-text: 500; --line: #313C49;
+  --atk: #FF6B78; --atk-soft: #3A1C21; --def: #4FD1C5; --def-soft: #123230; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.85; font-weight: var(--w-text);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--def); }
+.label { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--muted); }
+.num-t { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* 上部バー */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding-block: 20px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.brand { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+.brand:hover { text-decoration: underline; }
+.status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--def); }
+
+/* ヒーロー */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 44px; align-items: center; padding-block: 56px 48px; }
+.hero h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 4.6vw, 48px); line-height: 1.3; letter-spacing: 0.02em; }
+.lead { margin-top: 20px; font-size: 17px; color: var(--soft); max-width: 34em; }
+.facts { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; background: var(--panel); }
+.fact b { font-family: var(--f-mono); font-weight: 500; }
+
+/* ヒーローの図: 勝率の内訳（滝グラフ） */
+.why { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 16px; display: grid; gap: 14px; }
+.why .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.why .head b { font-size: 15px; }
+.wf { display: grid; gap: 6px; }
+.wf-row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 4.2em; gap: 10px; align-items: center; font-size: 13.5px; }
+.wf-row .k { color: var(--soft); line-height: 1.35; }
+.wf-row .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13.5px; }
+.track { position: relative; height: 18px; border-radius: 4px;
+  background: repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 25%); }
+.track::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px dashed var(--muted); opacity: .6; }
+.bar { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; }
+.bar.base { background: var(--muted); opacity: .55; top: 0; bottom: 0; }
+.bar.up { background: var(--def); }
+.bar.down { background: var(--atk); }
+.bar.end { background: var(--ink); top: 0; bottom: 0; }
+.wf-row.total .k, .wf-row.total .v { font-weight: 700; color: var(--ink); }
+.axis { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 4.2em; gap: 10px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.axis div { display: flex; justify-content: space-between; }
+.out { border-top: 1px solid var(--line); padding-top: 12px; font-size: 13.5px; color: var(--soft); line-height: 1.75; }
+.out .label { display: block; margin-bottom: 2px; }
+.why figcaption { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+
+/* 目次 */
+.toc { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 18px 22px; display: grid; gap: 10px; margin-bottom: 48px; scroll-margin-top: 16px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(6, auto); grid-auto-flow: column; gap: 4px 32px; }
+.toc a { display: grid; grid-template-columns: 2.4em minmax(0, 1fr); padding-block: 6px; color: var(--ink); text-decoration: none; font-size: 15px; border-bottom: 1px solid var(--line); }
+.toc a span { font-family: var(--f-mono); color: var(--atk); font-size: 13px; padding-top: 2px; }
+.toc a:hover { color: var(--def); }
+.back { font-size: 13px; color: var(--muted); text-decoration: none; margin-top: 4px; }
+.back:hover { color: var(--def); text-decoration: underline; }
+
+/* 章 */
+section.chapter { scroll-margin-top: 16px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-block: 56px; border-top: 1px solid var(--line); }
+.chapter > header { display: grid; gap: 8px; align-content: start; }
+.chapter h2 { font-family: var(--f-display); font-size: 26px; font-weight: 700; line-height: 1.45; }
+.body { display: grid; gap: 24px; min-width: 0; }
+.body > p { max-width: 40em; }
+.pivot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: stretch; max-width: 46em; }
+.pivot > div { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; background: var(--panel); }
+.pivot .after { border-color: var(--def); background: var(--def-soft); }
+.pivot .to { align-self: center; color: var(--def); font-size: 22px; border: 0; background: none; padding: 0; }
+.pivot b { font-size: 15.5px; }
+.pivot span:not(.label) { font-size: 14px; color: var(--soft); line-height: 1.7; }
+
+/* 方針 */
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pillar { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 8px; align-content: start; }
+.pillar h3 { font-size: 18px; line-height: 1.5; }
+.pillar p { font-size: 14.5px; color: var(--soft); line-height: 1.75; }
+
+/* 仕組み */
+.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px; }
+.diagram svg { display: block; min-width: 700px; width: 100%; height: auto; }
+.diagram .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.4; }
+.diagram .box-d { fill: var(--def-soft); stroke: var(--def); }
+.diagram .box-a { fill: var(--atk-soft); stroke: var(--atk); }
+.diagram .t { fill: var(--ink); font: 700 14px var(--f-body); }
+.diagram .s { fill: var(--soft); font: 400 12px var(--f-body); }
+.diagram .m { fill: var(--muted); font: 400 11px var(--f-mono); }
+.diagram .ln { stroke: var(--def); stroke-width: 1.8; fill: none; }
+.diagram .ln-a { stroke: var(--atk); stroke-width: 1.8; fill: none; stroke-dasharray: 6 4; }
+.diagram .ah { fill: var(--def); }
+.diagram .aha { fill: var(--atk); }
+.diagram .zone { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 2 5; }
+.diagram .zt { fill: var(--muted); font: 500 11.5px var(--f-mono); }
+.reads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0; padding: 0; list-style: none; }
+.reads li { padding-block: 10px; border-bottom: 1px solid var(--line); font-size: 15px; display: grid; gap: 2px; }
+.reads li span { color: var(--soft); font-size: 13.5px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.stat { display: grid; gap: 4px; align-content: start; }
+.stat .num { font-family: var(--f-mono); font-size: 32px; font-weight: 500; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.stat .num small { font-family: var(--f-body); font-size: 15px; color: var(--muted); margin-left: 4px; }
+.stat p { font-size: 13.5px; color: var(--soft); line-height: 1.7; }
+.note { font-size: 12.5px; color: var(--soft); }
+
+/* 精度の記録 */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.tbl table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+.tbl th, .tbl td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl th { font-size: 12px; font-weight: 500; color: var(--muted); font-family: var(--f-mono); letter-spacing: 0.04em; }
+.tbl td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tbl td.d { font-family: var(--f-mono); color: var(--muted); white-space: nowrap; }
+.tbl tr.best td { font-weight: 700; }
+.split { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.split div { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 12px 14px; display: grid; gap: 2px; }
+.split b { font-family: var(--f-mono); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.split span { font-size: 13px; color: var(--soft); line-height: 1.6; }
+.meter { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 4px; }
+.meter i { display: block; height: 100%; background: var(--def); }
+
+/* 工夫 */
+.fixes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.fix { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; background: var(--panel); }
+.fix h3 { font-size: 16px; line-height: 1.5; }
+.fix p { font-size: 14px; line-height: 1.75; color: var(--soft); display: grid; grid-template-columns: 3.2em minmax(0, 1fr); gap: 8px; }
+.fix p b { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--atk); padding-top: 2px; }
+.fix p.fix-a b { color: var(--def); }
+
+/* 画面 */
+.wide { margin: 0; display: grid; gap: 10px; }
+.wide .scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--line); }
+.wide img { display: block; width: 100%; min-width: 560px; height: auto; }
+.wide figcaption { font-size: 14px; color: var(--soft); }
+.pair { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.pair figure { margin: 0; display: grid; gap: 10px; }
+.pair img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); }
+.pair figcaption { font-size: 14px; color: var(--soft); }
+
+.shot-report { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: 24px; align-items: start; }
+.shot-report figure { margin: 0; }
+.shot-report img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); }
+.shot-report .cap { display: grid; gap: 10px; align-content: start; }
+.shot-report .cap b { font-size: 18px; }
+.shot-report .cap p { font-size: 14.5px; color: var(--soft); line-height: 1.8; }
+.sub-h { font-size: 18px; padding-top: 8px; }
+
+/* 機能・技術 */
+.apps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.app { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.app .label { color: var(--atk); }
+.app h3 { font-size: 17px; line-height: 1.5; }
+.app ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.app li { font-size: 14px; color: var(--soft); line-height: 1.7; }
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.stack dl { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; }
+.stack dt { font-weight: 700; font-size: 15px; }
+.stack dd { margin: 0; color: var(--soft); font-size: 14px; line-height: 1.75; }
+.stack dd code { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); }
+
+/* 進め方 */
+.roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.role { display: grid; gap: 6px; align-content: start; border-top: 3px solid var(--def); padding-top: 12px; }
+.role.ai { border-top-color: var(--line); }
+.role h3 { font-size: 16px; }
+.role p { font-size: 14.5px; color: var(--soft); line-height: 1.75; }
+.decisions { margin: 0; display: grid; }
+.decisions div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.decisions dt { font-weight: 700; font-size: 15px; }
+.decisions dd { margin: 0; font-size: 14px; color: var(--soft); line-height: 1.75; }
+
+/* 学んだこと */
+.quote { border-left: 4px solid var(--def); background: var(--def-soft); border-radius: 0 10px 10px 0; padding: 12px 18px; font-weight: 700; max-width: 40em; }
+.quote small { display: block; font-weight: var(--w-text); font-size: 13px; color: var(--soft); margin-top: 2px; }
+.sub-h + p, .body > h3.sub-h { max-width: 40em; }
+
+/* 記録 */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.timeline time { font-family: var(--f-mono); font-size: 14px; color: var(--muted); padding-top: 2px; }
+.timeline li.plan time { color: var(--atk); }
+.timeline li.plan b::after { content: "予定"; margin-left: 8px; font-size: 11.5px; color: var(--atk); border: 1px solid var(--atk); border-radius: 4px; padding: 0 5px; vertical-align: 2px; }
+.timeline b { display: block; font-size: 15px; }
+.timeline span { color: var(--soft); font-size: 14px; }
+.next { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 32px; margin: 0; padding: 0; list-style: none; }
+.next li { font-size: 15px; display: grid; gap: 2px; }
+.next li span { color: var(--soft); font-size: 13.5px; }
+
+footer { border-top: 1px solid var(--line); padding-block: 32px 48px; display: grid; gap: 10px; font-size: 13px; color: var(--soft); }
+footer .who { font-size: 15px; color: var(--ink); }
+a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 36px 32px; gap: 28px; }
+  .back { display: none; }
+  section.chapter { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 40px; }
+  .pillars, .stats, .apps, .toc ol { grid-template-columns: minmax(0, 1fr); }
+  .toc ol { grid-template-rows: none; grid-auto-flow: row; }
+  .split { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reads, .stack, .next, .fixes, .roles, .pair, .shot-report { grid-template-columns: minmax(0, 1fr); }
+  .decisions div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .pivot { grid-template-columns: minmax(0, 1fr); }
+  .pivot .to { transform: rotate(90deg); justify-self: center; }
+}
+@media (max-width: 600px) {
+  body { font-size: 17px; }
+  .lead { font-size: 17.5px; }
+  .label { font-size: 13px; }
+  .top { font-size: 15px; }
+  .fact { font-size: 15px; }
+  .wf-row, .wf-row .v { font-size: 14.5px; }
+  .wf-row, .axis { grid-template-columns: 6.6em minmax(0, 1fr) 3.8em; gap: 8px; }
+  .out, .why figcaption, .note, .wide figcaption, .pair figcaption { font-size: 14.5px; }
+  .chapter h2 { font-size: 25px; }
+  .shot-report .cap p { font-size: 15.5px; }
+  .pillar p, .stat p, .fix p, .role p, .decisions dd, .stack dd, .timeline span, .reads li span, .next li span, .app li, .split span, .pivot span:not(.label) { font-size: 15.5px; }
+  .tbl table { font-size: 15px; }
+  .fix { padding: 16px; }
+  .fix p { grid-template-columns: 2.6em minmax(0, 1fr); }
+  .fix p b { font-size: 12.5px; }
+  .pillar, .stack dl, .toc, .app { padding: 16px; }
+  .reads li, .next li, .timeline b, .decisions dt, .stack dt, .fix h3, .role h3, .pivot b, .app h3 { font-size: 16.5px; }
+  .toc a { font-size: 16px; }
+  .stack dd code { font-size: 14px; }
+  .timeline time { font-size: 15px; }
+  .timeline li { grid-template-columns: 5.6em minmax(0, 1fr); gap: 12px; }
+  .quote small { font-size: 14.5px; }
+  footer { font-size: 14.5px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bar.up, .bar.down { animation: grow .7s cubic-bezier(.2,.7,.2,1) both; transform-origin: left; }
+  @keyframes grow { from { transform: scaleX(.6); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="https://yugo303.github.io/">yugo303 ポートフォリオ</a>
+    <span class="status">自分の PC で使いながら開発中</span>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="label">個人開発 / Windows 向けデスクトップアプリ / 2026年6月〜</p>
+      <h1 style="margin-top: 14px;">VALORANT <span style="display: inline-block;">振り返りコーチ</span></h1>
+      <p class="lead">対戦ゲーム VALORANT の試合映像を入れると、ラウンドごとの勝率の動きを推定し、どの場面で何が原因で不利になったかを言葉で返すソフトです。プロの大会の配信映像も同じ方法で読み取り、学習データと「真似できる作戦の一覧」を作ります。</p>
+      <div class="facts">
+        <span class="fact">未知の試合での的中率 <b>75.3%</b></span>
+        <span class="fact">プロ <b>80</b> マップ・<b>1,578</b> ラウンドで検証</span>
+        <span class="fact">AI のサービスを使わず PC だけで動く</span>
+      </div>
+    </div>
+    <figure class="why" aria-label="勝率の内訳の例。攻撃の開始時点51%から、前のラウンドの負けでマイナス1.7、装備でプラス1.8、味方が1人少ないことでマイナス20.3、残り時間でプラス0.4、体力の差でマイナス7.0となり、勝率25%。">
+      <div class="head"><b>勝率 25% の内訳</b><span class="label">攻撃側・残り35秒・3対4</span></div>
+      <div class="wf">
+        <div class="wf-row"><span class="k">ラウンド開始</span><div class="track"><i class="bar base" style="left:0;width:51.4%"></i></div><span class="v">51%</span></div>
+        <div class="wf-row"><span class="k">前のラウンドに負け</span><div class="track"><i class="bar down" style="left:49.7%;width:1.7%"></i></div><span class="v">−1.7</span></div>
+        <div class="wf-row"><span class="k">装備はやや上</span><div class="track"><i class="bar up" style="left:49.7%;width:1.8%"></i></div><span class="v">+1.8</span></div>
+        <div class="wf-row"><span class="k">味方が1人少ない</span><div class="track"><i class="bar down" style="left:31.2%;width:20.3%"></i></div><span class="v">−20.3</span></div>
+        <div class="wf-row"><span class="k">残り時間</span><div class="track"><i class="bar up" style="left:31.2%;width:0.6%"></i></div><span class="v">+0.4</span></div>
+        <div class="wf-row"><span class="k">体力の差</span><div class="track"><i class="bar down" style="left:24.6%;width:7.0%"></i></div><span class="v">−7.0</span></div>
+        <div class="wf-row total"><span class="k">いまの勝率</span><div class="track"><i class="bar end" style="left:0;width:24.6%"></i></div><span class="v">25%</span></div>
+        <div class="axis"><span></span><div><span>0</span><span>50</span><span>100%</span></div><span></span></div>
+      </div>
+      <p class="out"><span class="label">レポートに出る文</span>勝率25%（攻撃の開始時点は51%）。下げた要因: 味方が1人少ない（3対4）（−20%）、体力: 味方は1人平均53% / 相手は90%（−7%）。</p>
+      <figcaption>説明用に作った場面を、10月1日時点の学習済みモデルで実際に計算した結果です。要因を1つずつ足していくので、内訳の合計は必ず最後の勝率と一致します。</figcaption>
+    </figure>
+  </header>
+
+  <nav class="toc" id="toc" aria-label="目次">
+    <span class="label">目次</span>
+    <ol>
+      <li><a href="#problem"><span>01</span>作ろうと思ったきっかけ</a></li>
+      <li><a href="#approach"><span>02</span>3つの方針</a></li>
+      <li><a href="#how"><span>03</span>仕組み</a></li>
+      <li><a href="#accuracy"><span>04</span>精度の記録</a></li>
+      <li><a href="#craft"><span>05</span>工夫したところ</a></li>
+      <li><a href="#screens"><span>06</span>画面と機能</a></li>
+      <li><a href="#tech"><span>07</span>技術と構成</a></li>
+      <li><a href="#process"><span>08</span>開発の進め方</a></li>
+      <li><a href="#log"><span>09</span>制作の記録</a></li>
+      <li><a href="#learned"><span>10</span>学んだこと・変わったこと</a></li>
+      <li><a href="#next"><span>11</span>これから</a></li>
+    </ol>
+  </nav>
+
+  <section class="chapter" id="problem">
+    <header>
+      <span class="label">01</span>
+      <h2>作ろうと思ったきっかけ</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>e スポーツにはまっていて、ゲームをただプレイするだけでなく、知識を活かして上手くなる方法はないかと考えていました。そこで思いついたのが、データを使った解析で自分の行動を振り返り、改善していくことです。</p>
+      <p>VALORANT は 5 対 5 で攻撃と防衛に分かれ、先に 13 ラウンドを取ったチームが勝つゲームです。戦績サイトではキル数や勝敗は分かりますが、ラウンドの中の「どの瞬間に、なぜ不利になったか」は、自分でリプレイを見返して考えるしかありません。そのため最初から、試合の映像そのものから人数や時間を読み取り、場面ごとの勝率を出すことを目指しました。</p>
+      <div class="pivot">
+        <div><span class="label">戦績サイトで分かること</span><b>試合ごとの成績</b><span>キル数・ダメージ・勝敗などの合計</span></div>
+        <div class="to" aria-hidden="true">→</div>
+        <div class="after"><span class="label">このソフトで分かること</span><b>ラウンドの中の、場面ごとの勝率</b><span>不利になった瞬間と、その理由まで</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="approach">
+    <header>
+      <span class="label">02</span>
+      <h2>3つの方針</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <div class="pillars">
+        <div class="pillar">
+          <h3>動画を入れるだけで動く</h3>
+          <p>リプレイ、プレイ中の録画、大会の配信のどれでも、解像度や画面の形が違っても、マップ・攻守・試合の区切りを自動で判定します。何本でもキューに積んでおけば、順番に解析します。</p>
+        </div>
+        <div class="pillar">
+          <h3>勝率には必ず理由をつける</h3>
+          <p>「勝率 25%」だけでは改善につながりません。人数・装備・体力・前のラウンドの流れなど、要因ごとに何%動いたかに分けて、文章で示します。</p>
+        </div>
+        <div class="pillar">
+          <h3>効果を測ってから採用する</h3>
+          <p>新しい情報を足すたびに、学習に使っていない試合で精度を比べ、良くなったときだけ使います。体力の情報は一度「効果なし」と判定され、データが増えてから自動で採用されました。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="how">
+    <header>
+      <span class="label">03</span>
+      <h2>仕組み</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>映像を一定の間隔で画像として読み、画面の決まった場所から数字や体力バーを読み取ります。読み取った値をラウンドごとの時系列にまとめ、勝率のモデルに通します。プロの配信から集めたデータは同じフォルダに貯まり、自分の試合の解析にもそのまま使われます。</p>
+
+      <div class="diagram" role="img" aria-label="仕組みの図。自分の試合の録画と、YouTube にある大会の公式フル試合を入力する。ffmpeg で画像にし、OpenCV で残り時間・スコア・体力・装備・ミニマップの位置を読み取り、ラウンドごとの時系列にする。勝率モデルで勝率を出し、要因ごとに分解して HTML のレポートにする。プロのデータは学習データと作戦の一覧にもなる。">
+        <svg viewBox="0 0 780 300">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 Z"></path></marker>
+            <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="aha" d="M0,0 L10,5 L0,10 Z"></path></marker>
+          </defs>
+          <rect class="zone" x="190" y="14" width="574" height="272" rx="12"></rect>
+          <text class="zt" x="202" y="34">自分の PC の中だけで処理</text>
+
+          <rect class="box box-d" x="16" y="52" width="150" height="70" rx="10"></rect>
+          <text class="t" x="30" y="80">自分の試合</text>
+          <text class="s" x="30" y="100">リプレイ・プレイ録画</text>
+          <rect class="box box-a" x="16" y="182" width="150" height="70" rx="10"></rect>
+          <text class="t" x="30" y="210">プロの試合</text>
+          <text class="s" x="30" y="230">公式フル試合の配信</text>
+          <text class="m" x="30" y="246">yt-dlp</text>
+
+          <rect class="box" x="210" y="112" width="160" height="80" rx="10"></rect>
+          <text class="t" x="224" y="140">画面を読み取る</text>
+          <text class="s" x="224" y="160">時間・スコア・体力・装備</text>
+          <text class="s" x="224" y="176">ミニマップの位置</text>
+
+          <rect class="box" x="400" y="112" width="160" height="80" rx="10"></rect>
+          <text class="t" x="414" y="140">ラウンドの時系列</text>
+          <text class="s" x="414" y="160">人数の変化・設置・決着</text>
+          <text class="m" x="414" y="178">CSV / JSON に保存</text>
+
+          <rect class="box box-d" x="590" y="52" width="160" height="80" rx="10"></rect>
+          <text class="t" x="604" y="80">勝率と理由</text>
+          <text class="s" x="604" y="100">要因ごとに分解</text>
+          <text class="m" x="604" y="118">HTML レポート</text>
+
+          <rect class="box box-a" x="590" y="182" width="160" height="80" rx="10"></rect>
+          <text class="t" x="604" y="210">学習・作戦の一覧</text>
+          <text class="s" x="604" y="230">モデルを再学習</text>
+          <text class="s" x="604" y="246">配置の型・作戦カード</text>
+
+          <path class="ln" d="M166,87 L188,87 L188,140 L208,140" marker-end="url(#ah)"></path>
+          <path class="ln-a" d="M166,217 L188,217 L188,166 L208,166" marker-end="url(#aha)"></path>
+          <text class="m" x="214" y="210">ffmpeg + OpenCV</text>
+          <path class="ln" d="M370,152 L398,152" marker-end="url(#ah)"></path>
+          <path class="ln" d="M560,140 L575,140 L575,92 L588,92" marker-end="url(#ah)"></path>
+          <path class="ln-a" d="M560,164 L575,164 L575,222 L588,222" marker-end="url(#aha)"></path>
+          <path class="ln-a" d="M670,182 L670,134" marker-end="url(#aha)"></path>
+          <text class="m" x="676" y="162">学習結果を使う</text>
+        </svg>
+      </div>
+
+      <ul class="reads">
+        <li>残り時間・スコア<span>配信ごとの数字の形を映像から覚え、照合して読む</span></li>
+        <li>生存人数・体力<span>選手カードの体力バーの長さ。瀕死・復活も判定</span></li>
+        <li>装備（買い物）<span>武器の絵の幅とシールドの数字から、エコ・フルバイを判定</span></li>
+        <li>スパイクの設置<span>時計の表示の変化から。0:15 の赤い時計と区別</span></li>
+        <li>アルティメット・スキル<span>カードの点線の輪の点き具合、スキルの残り回数</span></li>
+        <li>選手の位置<span>ミニマップの顔アイコンを照合し、攻守とエージェント名を推定</span></li>
+      </ul>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="num">1,578<small>ラウンド</small></span>
+          <p>勝率モデルの検証に使ったプロの試合。VCT の公式フル試合 30 本・80 マップ分を、自分の PC で集めました。</p>
+        </div>
+        <div class="stat">
+          <span class="num">84<small>作戦</small></span>
+          <p>プロの配置から作った作戦の数（攻撃 53・防衛 31、10 マップ）。6 ラウンド以上使われたものだけを残しています。</p>
+        </div>
+        <div class="stat">
+          <span class="num">0.18<small>秒 / 枚</small></span>
+          <p>画像1枚を読み取る時間。2 時間の配信も、ダウンロードから解析・動画の削除まで自動で進みます。</p>
+        </div>
+      </div>
+      <p class="note">アドバイスの文章は AI が書いているのではなく、計算した数字と条件に合わせて、あらかじめ用意した文に当てはめています。同じ動画なら必ず同じ結果になり、データが外に出ることもありません。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="accuracy">
+    <header>
+      <span class="label">04</span>
+      <h2>精度の記録</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>精度は、試合ごとにデータを分け、学習に使っていない試合で当たるかで測っています（5 分割の交差検証）。同じ試合の別のラウンドが学習側に混ざると、良く見えすぎるためです。log-loss は確率の外れ方の大きさで、低いほど良い値です。</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>日付</th><th>入れたもの</th><th>log-loss</th><th>的中率</th></tr></thead>
+          <tbody>
+            <tr><td class="d">—</td><td>汎用の式（人数・時間・設置だけ）</td><td class="n">0.541</td><td class="n">69.0%</td></tr>
+            <tr><td class="d">09/27</td><td>前のラウンドの勝敗・連敗数（お金の代わり）、生存人数の揺れの補正</td><td class="n">—</td><td class="n">—</td></tr>
+            <tr><td class="d">09/29</td><td>チームの合計体力</td><td class="n">0.486</td><td class="n">74.5%</td></tr>
+            <tr class="best"><td class="d">10/01</td><td>装備（武器とシールド）を全試合に</td><td class="n">0.467</td><td class="n">75.3%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">09/27 の改良は当時のデータ（プロ 7 マップ）で log-loss 0.506 → 0.472 になりましたが、データの量が違うため表には並べていません。参考として、CS:GO でサーバーの完全なデータ（装備・体力・位置つき）を使った研究の値は log-loss 0.535 です。</p>
+      <p>場面ごとに分けると、人数に差がついたあとはよく当たり、撃ち合いが始まる前はまだ当てにくいことが分かりました。残りの伸びしろは 5 対 5 の場面にあり、位置の情報を足す理由になっています。</p>
+      <div class="split">
+        <div><span>人数に差がある</span><b>85%</b><div class="meter"><i style="width:85%"></i></div></div>
+        <div><span>スパイク設置後</span><b>85%</b><div class="meter"><i style="width:85%"></i></div></div>
+        <div><span>同じ人数（5人未満）</span><b>61%</b><div class="meter"><i style="width:61%"></i></div></div>
+        <div><span>5 対 5（時間の35%）</span><b>63%</b><div class="meter"><i style="width:63%"></i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="craft">
+    <header>
+      <span class="label">05</span>
+      <h2>工夫したところ</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <div class="fixes">
+        <div class="fix">
+          <h3>数字が読めない</h3>
+          <p><b>課題</b><span>一般的な文字認識（Tesseract）では、明るい背景と独特な字体の画面の数字を安定して読めませんでした。</span></p>
+          <p class="fix-a"><b>対応</b><span>配信ごとに数字の形を映像から覚え、その形と照合して読む方式を自作しました。速さと正確さの両方が上がりました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>半分のラウンドでチームが入れ替わっていた</h3>
+          <p><b>課題</b><span>配信の赤と水色をチームの色だと思っていましたが、実際は攻撃・防衛の色で、前半と後半で入れ替わっていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>選手カードの体力バーの色で攻守を判定し直しました。古い方式のデータには版の番号をつけ、自動で見つけて集め直せるようにしました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>2 時間の動画が 1 分しか読めない</h3>
+          <p><b>課題</b><span>ダウンロードが途中で失敗したあと、別の画質の続きを同じファイルにつないでしまい、壊れた動画ができていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>やり直すときは最初から取り直し、取得した直後に8か所を試し読みして確かめます。途中までしか読めなかった結果は保存しません。</span></p>
+        </div>
+        <div class="fix">
+          <h3>残り 15 秒を「設置」と間違える</h3>
+          <p><b>課題</b><span>今年の配信は残り 15 秒で時計が赤くなり、スパイク設置の表示と同じに見えていました。検出した設置の約4分の1がこれでした。</span></p>
+          <p class="fix-a"><b>対応</b><span>直前の時計が 15 秒前後なら設置とみなさないようにしました。設置後の攻撃側の勝率が 70% になり、現実的な値に戻りました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>死んだ選手が生き返る</h3>
+          <p><b>課題</b><span>配信の演出がカードに重なる瞬間などに、ラウンド途中で生存人数が増える揺れが、ラウンドの 64% で起きていました。</span></p>
+          <p class="fix-a"><b>対応</b><span>ラウンド全体を見て死亡した時点を決め、はっきりした復活だけを認めるようにしました。揺れは 6% に減りました。</span></p>
+        </div>
+        <div class="fix">
+          <h3>学習が発散した</h3>
+          <p><b>課題</b><span>勝率モデルの学習で係数が −1440 のような値に飛び、使えないモデルができていました（検証で弾かれて実害はなし）。</span></p>
+          <p class="fix-a"><b>対応</b><span>損失が下がるまで1歩を半分にする学習に変えました。自分の試合のデータで log-loss が 0.680 から 0.558 になりました。</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="screens">
+    <header>
+      <span class="label">06</span>
+      <h2>画面と機能</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>起動ファイルをダブルクリックすると開く、3つのアプリに分かれています。データのフォルダは共有なので、プロから集めた学習結果は自分の試合の解析に自動で使われます。</p>
+      <div class="apps">
+        <div class="app">
+          <span class="label">1_自分の試合を解析</span>
+          <h3>自分の試合を振り返る</h3>
+          <ul>
+            <li>動画をキューに積んで順番に解析、済んだものに ✔</li>
+            <li>ラウンドごとの勝率の推移と、大きく下がった瞬間（動画の時刻つき）</li>
+            <li>自分のデスを、失った勝率の大きい順に振り返る</li>
+            <li>「トレードなし」「人数有利の時」などのタグと改善のヒント</li>
+          </ul>
+        </div>
+        <div class="app">
+          <span class="label">2_プロ試合データ収集</span>
+          <h3>プロの試合を集める</h3>
+          <ul>
+            <li>VCT 公式チャンネルのフル試合を一覧から選ぶだけ</li>
+            <li>ダウンロード → 解析 → 動画の削除を自動で連続実行</li>
+            <li>YouTube に止められたら 90 分待って自動で再開</li>
+            <li>保存した読み取りから、ダウンロードなしで作り直し</li>
+            <li>毎日決まった時刻に、未収集の公式試合を自動で集める（次の動画は先読み）</li>
+          </ul>
+        </div>
+        <div class="app">
+          <span class="label">3_プロ配置コーチ</span>
+          <h3>プロの作戦を覚える</h3>
+          <ul>
+            <li>マップと攻守ごとの「戦略の引き出し」（作戦カード）</li>
+            <li>試合の動画を入れると、ラウンドごとの配置・動き・理由（推測）を解説</li>
+            <li>プロの実例へ YouTube の該当時刻で飛べる</li>
+          </ul>
+        </div>
+      </div>
+      <div class="shot-report">
+        <figure>
+          <img src="img/report.webp" alt="振り返りレポートの画面。解析できたラウンド13、7勝5敗、攻撃の勝率56%などの数字の下に、改善ポイント（人数有利からの敗北など）と動画の時刻へのボタン、位置・陣形の分析が並ぶ" width="1120" height="1215" loading="lazy">
+        </figure>
+        <div class="cap">
+          <span class="label">1_自分の試合を解析</span>
+          <b>振り返りレポート</b>
+          <p>自分の試合を解析すると、ブラウザで開くレポートができます。上に試合の数字、その下に「人数有利からの敗北」のような改善ポイントが並び、▶ を押すとその場面の動画の時刻に飛べます。</p>
+          <p class="note">7月25日のプレイ録画を、9月24日に解析したときのものです。このころはまだ学習データが少なく、汎用の式で勝率を出しています。</p>
+        </div>
+      </div>
+      <figure class="wide">
+        <div class="scroll"><img src="img/collector.webp" alt="プロ試合データ収集アプリの画面。左にキューの試合一覧と状態、右に公式のフル試合の一覧と収集済みの印、下に進み具合とログ" width="1479" height="810" loading="lazy"></div>
+        <figcaption>プロ試合データ収集アプリ。右の公式フル試合の一覧から選んでキューに積むと、ダウンロード・解析・削除を順に進めます。下のログでは、解析中に次の動画を先にダウンロードしています。</figcaption>
+      </figure>
+      <figure class="wide">
+        <div class="scroll"><img src="img/library.webp" alt="プロ配置コーチの戦略の引き出し。Lotus の攻撃の作戦一覧と、選んだ作戦「Aサイト実行（エリアを取ってから）」のマップ図と説明" width="2000" height="1087" loading="lazy"></div>
+        <figcaption>プロ配置コーチの「戦略の引き出し」。Lotus のプロ 396 ラウンドから作った攻撃の作戦が、回数と勝率つきで並びます。選ぶと、最初の配置・目指すこと・動き方の手順がマップの図と一緒に出ます。</figcaption>
+      </figure>
+      <h3 class="sub-h">アイコン検出の調整</h3>
+      <figure class="wide">
+        <div class="scroll"><img src="img/label.webp" alt="ミニマップの正解付けの画面。左に配信のミニマップと検出結果の点線の丸、中央に操作ボタン、右上に拡大鏡と使い方の説明" width="1480" height="800" loading="lazy"></div>
+        <figcaption>ミニマップのアイコン検出を調整する画面（Tkinter）。検出結果を正解に写して違う所だけ直し、精度を測ります。拡大鏡と、前後2秒の動きを見る機能で、重なった選手とスキルの印を見分けます。</figcaption>
+      </figure>
+      <div class="pair">
+        <figure>
+          <img src="img/overlay.webp" alt="ミニマップに、検出した選手の丸と自分で付けた正解の点を重ねた画像" width="666" height="606" loading="lazy">
+          <figcaption>検出（丸）と正解（＋）を重ねて、どこで見落としているかを確かめた画像。</figcaption>
+        </figure>
+        <figure>
+          <img src="img/resolution.webp" alt="重なった2人の選手アイコンを、左は半分の解像度、右は元の解像度で並べた比較" width="1210" height="480" loading="lazy">
+          <figcaption>「画像が粗いのでは」と気づいて比べたもの。左が保存していた半分の解像度、右が元の解像度です。表示を元の解像度に変え、配信は 1080p のままにしました。</figcaption>
+        </figure>
+      </div>
+      <p class="note">画面内のミニマップは VCT の配信映像を解析用に切り抜いたものです。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="tech">
+    <header>
+      <span class="label">07</span>
+      <h2>技術と構成</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>Python で、外部のライブラリは OpenCV・NumPy・ffmpeg まわりと yt-dlp にしぼっています。機械学習のライブラリは使わず、勝率モデルは NumPy で自作しました。モデルが小さいので、学習は PC で数秒で終わります。</p>
+      <div class="stack">
+        <dl>
+          <dt>映像の読み取り</dt>
+          <dd><code>OpenCV</code> と <code>NumPy</code> で数字・体力バー・武器の絵・ミニマップを読みます。動画は <code>ffmpeg</code>（<code>imageio-ffmpeg</code>）で画像にし、途中で止まったら <code>PyAV</code> など別の読み方で続きから読みます。</dd>
+          <dt>勝率モデル</dt>
+          <dd>ロジスティック回帰を NumPy で自作し、減衰つきのニュートン法で学習します。体力・装備などは、未知の試合で良くなるときだけ自動で使います。</dd>
+        </dl>
+        <dl>
+          <dt>データ収集</dt>
+          <dd><code>yt-dlp</code> で公式フル試合を取得し、試合の一覧は <code>YouTube Data API</code>、マップとエージェントの画像は <code>valorant-api.com</code> から取ります。</dd>
+          <dt>画面と保存</dt>
+          <dd>画面は <code>Tkinter</code>、レポートは HTML と SVG の図です。データは CSV と JSON。コードは約 1.3 万行・55 ファイル（10 月 8 日時点）で、GitHub の非公開リポジトリで管理しています。</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="process">
+    <header>
+      <span class="label">08</span>
+      <h2>開発の進め方</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>最初の試作は AI の Gemini と作り、2026年9月からは AI コーディングアシスタントの Claude で作り直して改良を続けています。Claude が書いたコードは自分の PC のフォルダに入り、自分で動かして結果やエラーを返す、という往復で進めています。</p>
+      <div class="roles">
+        <div class="role">
+          <h3>自分が担当したこと</h3>
+          <p>何を作るかと機能の要望、優先順位の決定、自分の PC での実行とプロの試合のデータ収集（公式フル試合 30 本以上）、結果とエラーの確認と報告、ミニマップの正解付け、方針の転換の判断を担当しました。</p>
+        </div>
+        <div class="role ai">
+          <h3>AI に任せたこと</h3>
+          <p>コードの実装、不具合の原因の調査、精度の検証の計算、設計メモの記録を任せました。出てきた案を採用するかどうかは、自分で決めています。</p>
+        </div>
+      </div>
+      <dl class="decisions">
+        <div><dt>精度を「未知の試合」で測るようにした</dt><dd>「データを増やせば精度は上がるのか」と質問したところ、それまでの数字は学習に使ったデータで測っていて、良く見えすぎると分かりました。学習に使っていない試合で測る検証を入れてもらい、以後の改良はすべてこの数字で判断しています。</dd></div>
+        <div><dt>自分用とプロ用のアプリを分け、キューで連続解析</dt><dd>たくさんの動画を、手を離したまま続けて解析したかったためです。解析済みの動画は飛ばし、URL を貼るだけで積めるようにしました。</dd></div>
+        <div><dt>リプレイだけでなく、プレイ中の録画にも対応</dt><dd>リプレイを用意しなくても、普段の録画のまま振り返れるようにしました。敵が見えていない場面があるため、録画では敵の位置は使いません。</dd></div>
+        <div><dt>位置だけで勝敗を当てるのをやめ、プロの「型」を真似できる形に</dt><dd>配置だけでの予測は 5 対 5 で的中 63% が限界でした。当てることより、普通のプレイヤーが試合前に読んで真似できる作戦の一覧のほうが役に立つと考え、3つ目のアプリを作りました。</dd></div>
+        <div><dt>データの扱いを先に決めた</dt><dd>将来の公開も考え、動画は解析が終わったら削除し、選手名やチーム名は保存せず、位置・人数・勝敗の数字だけを残す作りにしています。</dd></div>
+        <div><dt>解像度は上げなかった</dt><dd>ミニマップが粗いと感じて相談しました。原因は保存していた縮小画像の表示で、元の映像は十分な細かさでした。処理が約 1.8 倍重くなる高解像度化はやめ、表示を直しました。</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="chapter" id="log">
+    <header>
+      <span class="label">09</span>
+      <h2>制作の記録</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <ol class="timeline">
+        <li><time>2026/06頃</time><div><b>最初の試作</b><span>リプレイの映像から数値を取り出して表にするスクリプトを、Gemini と作りました。</span></div></li>
+        <li><time>09/23</time><div><b>1つのソフトに作り直す</b><span>Claude で作り直し、勝率の推移と改善点の HTML レポートが出るようになりました。同じ日に、位置の分析・プロの配信の収集・アプリの分離・未知の試合での検証を加えました。</span></div></li>
+        <li><time>09/26</time><div><b>配信の色の意味を直す</b><span>赤と水色が攻守の色だと分かり、データを集め直しました。学習の発散も直しました。</span></div></li>
+        <li><time>09/27</time><div><b>精度の上限を調べる</b><span>今の入力では頭打ちだと確かめ、前のラウンドの流れと生存人数の補正を足しました。壊れた動画の対策と、配信の画面配置を登録する画面も作りました。</span></div></li>
+        <li><time>09/29</time><div><b>装備の読み取りと、勝率の理由</b><span>武器とシールドからお金の使い方を判定し、勝率を要因ごとに分けて文章にしました。自分のデスの振り返りもここで入りました。</span></div></li>
+        <li><time>10/01</time><div><b>的中率 75.3%</b><span>装備を全試合に入れて検証しました。アルティメットとスキルの読み取り、ダウンロードの失敗対策も加えました。</span></div></li>
+        <li><time>10/07</time><div><b>GitHub で管理を始める</b><span>フォルダの構成を整理し、非公開のリポジトリに移しました。</span></div></li>
+        <li><time>10/08</time><div><b>プロ配置コーチと戦略の引き出し</b><span>プロの配置を型に分け、マップ・攻守ごとの作戦カード（攻撃 53・防衛 31）を作りました。</span></div></li>
+        <li><time>10/14</time><div><b>アイコン検出の精度を測る</b><span>自分で 22 枚・150 人分の正解を付けて測り、見間違いの見本を使うことで誤検出を 23% から 17% に減らしました。</span></div></li>
+        <li><time>10/28</time><div><b>毎日の自動収集を始める</b><span>未収集の公式フル試合を毎日自動で集めるようにしました。画面の部品を元の解像度で残しておき、読み取り方を変えてもダウンロードし直さずに読み直せます。最初の実行では2時間で3試合をエラーなく集めました。</span></div></li>
+        <li class="plan"><time>これから</time><div><b>重なった選手を見つける</b><span>生存人数と照らし合わせて、重なって見えない選手を補う予定です。</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="chapter" id="learned">
+    <header>
+      <span class="label">10</span>
+      <h2>学んだこと・変わったこと</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <h3 class="sub-h">いちばん大変だった画像認識</h3>
+      <p>始める前は、画面の数字くらいすぐに読み取れて、データを集める段階にすぐ移れると思っていました。実際には、明るい背景や独特な字体、画素数の粗さのせいで、数字がうまく読めませんでした。数字や画面の部品の位置を登録する画面を作ってもらい、自分の手で枠を切り抜いて、ようやく読めるようになりました。</p>
+      <p>キャラクターの見分けも同じでした。顔くらいすぐに見分けられて、あとはデータを入れていくだけだと思っていました。ところが、どちらのチームかの見分け、重なった選手が誰か分からないこと、壁のしみのような模様をキャラクターと間違えることなど、直すことが次々に出てきました。想定が甘かったところもあります。</p>
+      <div class="quote">データは今の世の中にいくらでもある。大事なのは、それをどういう方法で正確に使うか、間違わずに使えているかを確かめること。<small>開発を通して学んだこと</small></div>
+      <h3 class="sub-h">自分のプレイで変わったこと</h3>
+      <p>前から作戦がほしいとは思っていましたが、実行に移すには誰をどう動かせばいいのかが分からず、本当に引き出しがない感覚でした。戦略の引き出しを読むようになってから、何も考えずにプレイすることが減りました。行き詰まったときに別の方法を試せるようになり、負ける確率を上げる行動も避けられるようになったと思います。</p>
+      <div class="pivot">
+        <div><span class="label">これまで</span><b>仲間に伝える作戦は3択ほど</b><span>何をどう動かせばいいか分からない</span></div>
+        <div class="to" aria-hidden="true">→</div>
+        <div class="after"><span class="label">いま</span><b>状況に合わせて選べる作戦がたくさんある</b><span>プロのデータをもとに、動き方まで決めて伝えられる</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="next">
+    <header>
+      <span class="label">11</span>
+      <h2>これから</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <ul class="next">
+        <li>ミニマップの見落としを減らす<span>今は 26%。半分近くは選手どうしの重なり</span></li>
+        <li>自分のマーカーを見つける<span>デスの「場所」まで振り返れるようにする</span></li>
+        <li>所持金の数字を読む<span>装備よりも正確にお金の状況を入れる</span></li>
+        <li>プロと自分の比較<span>同じマップ・攻守で、配置や動きの差を並べる</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p class="who">企画・開発: yugo303</p>
+    <p>実装には AI の Gemini と、AI コーディングアシスタント Claude を使用しています。</p>
+    <p>学習データ: VALORANT Champions Tour の公式チャンネルが YouTube で公開しているフル試合を、個人の分析の範囲で解析したもの（動画は解析後に削除）。マップとエージェントの情報: valorant-api.com。</p>
+    <p>VALORANT は Riot Games, Inc. の商標です。このページとソフトは Riot Games が承認・関与したものではありません。数値は 2026年10月時点のものです。</p>
+  </footer>
+</div>
+
+</body>
+</html>
