@@ -296,8 +296,8 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
       <h1 style="margin-top: 14px;">VALORANT <span style="display: inline-block;">振り返りコーチ</span></h1>
       <p class="lead">対戦ゲーム VALORANT の試合映像を入れると、ラウンドごとの勝率の動きを推定し、どの場面で何が原因で不利になったかを言葉で返すソフトです。プロの大会の配信映像も同じ方法で読み取り、学習データと「真似できる作戦の一覧」を作ります。</p>
       <div class="facts">
-        <span class="fact">未知の試合での的中率 <b>75.3%</b></span>
-        <span class="fact">プロ <b>80</b> マップ・<b>1,578</b> ラウンドで検証</span>
+        <span class="fact">未知の試合での的中率 <b>74.8%</b></span>
+        <span class="fact"><b>141</b> マップの試合で検証</span>
         <span class="fact">AI のサービスを使わず PC だけで動く</span>
       </div>
     </div>
@@ -444,8 +444,8 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
       <div class="stats">
         <div class="stat">
-          <span class="num">1,578<small>ラウンド</small></span>
-          <p>勝率モデルの検証に使ったプロの試合。VCT の公式フル試合 30 本・80 マップ分を、自分の PC で集めました。</p>
+          <span class="num">141<small>マップ</small></span>
+          <p>勝率モデルの検証に使った試合（10 月 29 日時点）。ほとんどは自分の PC で集めた VCT の公式フル試合で、毎日の自動収集で増え続けています。</p>
         </div>
         <div class="stat">
           <span class="num">84<small>作戦</small></span>
@@ -472,15 +472,16 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
         <table>
           <thead><tr><th>日付</th><th>入れたもの</th><th>log-loss</th><th>的中率</th></tr></thead>
           <tbody>
-            <tr><td class="d">—</td><td>汎用の式（人数・時間・設置だけ）</td><td class="n">0.541</td><td class="n">69.0%</td></tr>
+            <tr><td class="d">—</td><td>汎用の式（人数・時間・設置だけ、10/01 時点のデータ）</td><td class="n">0.541</td><td class="n">69.0%</td></tr>
             <tr><td class="d">09/27</td><td>前のラウンドの勝敗・連敗数（お金の代わり）、生存人数の揺れの補正</td><td class="n">—</td><td class="n">—</td></tr>
             <tr><td class="d">09/29</td><td>チームの合計体力</td><td class="n">0.486</td><td class="n">74.5%</td></tr>
-            <tr class="best"><td class="d">10/01</td><td>装備（武器とシールド）を全試合に</td><td class="n">0.467</td><td class="n">75.3%</td></tr>
+            <tr><td class="d">10/01</td><td>装備（武器とシールド）を全試合に（80 マップ）</td><td class="n">0.467</td><td class="n">75.3%</td></tr>
+            <tr class="best"><td class="d">10/29</td><td>自動収集で試合が 141 マップに増えた（汎用の式は 0.542）</td><td class="n">0.469</td><td class="n">74.8%</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="note">09/27 の改良は当時のデータ（プロ 7 マップ）で log-loss 0.506 → 0.472 になりましたが、データの量が違うため表には並べていません。参考として、CS:GO でサーバーの完全なデータ（装備・体力・位置つき）を使った研究の値は log-loss 0.535 です。</p>
-      <p>場面ごとに分けると、人数に差がついたあとはよく当たり、撃ち合いが始まる前はまだ当てにくいことが分かりました。残りの伸びしろは 5 対 5 の場面にあり、位置の情報を足す理由になっています。</p>
+      <p class="note">試合が増えて種類が広がっても、精度はほぼ同じ水準を保っています。09/27 の改良は当時のデータ（プロ 7 マップ）で log-loss 0.506 → 0.472 になりましたが、データの量が違うため表には並べていません。参考として、CS:GO でサーバーの完全なデータ（装備・体力・位置つき）を使った研究の値は log-loss 0.535 です。</p>
+      <p>10/01 時点のデータで場面ごとに分けると、人数に差がついたあとはよく当たり、撃ち合いが始まる前はまだ当てにくいことが分かりました。残りの伸びしろは 5 対 5 の場面にあり、位置の情報を足す理由になっています。</p>
       <div class="split">
         <div><span>人数に差がある</span><b>85%</b><div class="meter"><i style="width:85%"></i></div></div>
         <div><span>スパイク設置後</span><b>85%</b><div class="meter"><i style="width:85%"></i></div></div>
