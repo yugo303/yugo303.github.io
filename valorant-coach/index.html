@@ -98,6 +98,25 @@ a { color: var(--def); }
 .out .label { display: block; margin-bottom: 2px; }
 .why figcaption { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
 
+.demo { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--atk); border: 1px solid var(--atk); border-radius: 4px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; letter-spacing: 0.04em; }
+.what { font-size: 13.5px; color: var(--soft); line-height: 1.7; }
+.hud { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: end; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.hud .team { display: grid; gap: 4px; }
+.hud .team.def { justify-items: end; }
+.hud .who { font-size: 11.5px; color: var(--muted); }
+.hud .slots { display: flex; gap: 5px; }
+.hud .team.def .slots { flex-direction: row-reverse; }
+.hud .p { position: relative; width: 22px; height: 26px; border-radius: 4px; display: block; }
+.hud .atk .p { background: var(--atk-soft); border: 1.5px solid var(--atk); }
+.hud .def .p { background: var(--def-soft); border: 1.5px solid var(--def); }
+.hud .p::after { content: ""; position: absolute; left: 2px; bottom: -6px; height: 3px; width: calc((100% - 4px) * var(--hp, 0) / 100%); border-radius: 2px; background: var(--ink); }
+.hud .p.dead { background: transparent; border-style: dashed; opacity: .45; }
+.hud .p.dead::after { display: none; }
+.hud .clock { display: grid; justify-items: center; line-height: 1.2; padding-bottom: 4px; }
+.hud .clock b { font-family: var(--f-mono); font-size: 18px; font-weight: 500; }
+.hud .clock span { font-size: 11px; color: var(--muted); }
+.hud-cap { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-top: -6px; }
+
 /* 目次 */
 .toc { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 18px 22px; display: grid; gap: 10px; margin-bottom: 48px; scroll-margin-top: 16px; }
 .toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(6, auto); grid-auto-flow: column; gap: 4px 32px; }
@@ -261,6 +280,10 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
   .out, .why figcaption, .note, .wide figcaption, .pair figcaption { font-size: 14.5px; }
   .chapter h2 { font-size: 25px; }
   .shot-report .cap p { font-size: 15.5px; }
+  .hud { gap: 6px; padding: 10px 8px; }
+  .hud .slots { gap: 3px; }
+  .hud .p { width: 17px; height: 22px; }
+  .what, .hud-cap { font-size: 14.5px; }
   .pillar p, .stat p, .fix p, .role p, .decisions dd, .stack dd, .timeline span, .reads li span, .next li span, .app li, .split span, .pivot span:not(.label) { font-size: 15.5px; }
   .tbl table { font-size: 15px; }
   .fix { padding: 16px; }
@@ -294,7 +317,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
     <div>
       <p class="label">個人開発 / Windows 向けデスクトップアプリ / 2026年6月〜</p>
       <h1 style="margin-top: 14px;">VALORANT <span style="display: inline-block;">振り返りコーチ</span></h1>
-      <p class="lead">対戦ゲーム VALORANT の試合映像を入れると、ラウンドごとの勝率の動きを推定し、どの場面で何が原因で不利になったかを言葉で返すソフトです。自分の試合では、デスの場所を同じ状況のプロと比べ、改善点を3つにしぼって示します。プロの大会の配信映像も同じ方法で読み取り、学習データと「真似できる作戦の一覧」を作ります。</p>
+      <p class="lead">e スポーツとしても人気の対戦ゲーム VALORANT の試合映像を入れると、ラウンドごとの勝率の動きを推定し、どの場面で何が原因で不利になったかを言葉で返すソフトです。自分の試合では、デスの場所を同じ状況のプロと比べ、改善点を3つにしぼって示します。プロの大会の配信映像も同じ方法で読み取り、学習データと「真似できる作戦の一覧」を作ります。</p>
       <div class="facts">
         <span class="fact">未知の試合での的中率 <b>74.8%</b></span>
         <span class="fact"><b>141</b> マップの試合で検証</span>
@@ -302,7 +325,20 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
       </div>
     </div>
     <figure class="why" aria-label="勝率の内訳の例。攻撃の開始時点51%から、前のラウンドの負けでマイナス1.7、装備でプラス1.8、味方が1人少ないことでマイナス20.3、残り時間でプラス0.4、体力の差でマイナス7.0となり、勝率25%。">
-      <div class="head"><b>勝率 25% の内訳</b><span class="label">攻撃側・残り35秒・3対4</span></div>
+      <div class="head"><b>勝率 25% の内訳 <span class="demo">デモ</span></b><span class="label">攻撃側・残り35秒・3対4</span></div>
+      <p class="what">試合のある瞬間に「なぜ勝率がこの値なのか」を、要因ごとに分けて見せる図です。下の画面の状況（説明用に作ったもの）を、実際のモデルで計算しました。</p>
+      <div class="hud" role="img" aria-label="画面上部の図。左の味方（攻撃）は5人中3人が生存、体力は少なめ。中央の残り時間は0:35でスパイクは未設置。右の相手（防衛）は5人中4人が生存、体力はほぼ満タン。">
+        <div class="team atk">
+          <span class="who">味方・攻撃</span>
+          <div class="slots"><i class="p" style="--hp:45%"></i><i class="p" style="--hp:60%"></i><i class="p" style="--hp:55%"></i><i class="p dead"></i><i class="p dead"></i></div>
+        </div>
+        <div class="clock"><b>0:35</b><span>未設置</span></div>
+        <div class="team def">
+          <span class="who">相手・防衛</span>
+          <div class="slots"><i class="p" style="--hp:100%"></i><i class="p" style="--hp:85%"></i><i class="p" style="--hp:90%"></i><i class="p" style="--hp:85%"></i><i class="p dead"></i></div>
+        </div>
+      </div>
+      <p class="hud-cap">ソフトが画面から読み取る値（図）: 生存人数・体力バー・残り時間・スパイク。ここに前のラウンドの結果と装備が加わります。</p>
       <div class="wf">
         <div class="wf-row"><span class="k">ラウンド開始</span><div class="track"><i class="bar base" style="left:0;width:51.4%"></i></div><span class="v">51%</span></div>
         <div class="wf-row"><span class="k">前のラウンドに負け</span><div class="track"><i class="bar down" style="left:49.7%;width:1.7%"></i></div><span class="v">−1.7</span></div>
@@ -314,36 +350,58 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
         <div class="axis"><span></span><div><span>0</span><span>50</span><span>100%</span></div><span></span></div>
       </div>
       <p class="out"><span class="label">レポートに出る文</span>勝率25%（攻撃の開始時点は51%）。下げた要因: 味方が1人少ない（3対4）（−20%）、体力: 味方は1人平均53% / 相手は90%（−7%）。</p>
-      <figcaption>説明用に作った場面を、10月1日時点の学習済みモデルで実際に計算した結果です。要因を1つずつ足していくので、内訳の合計は必ず最後の勝率と一致します。</figcaption>
+      <figcaption>場面は説明用に作ったもので、実際の試合ではありません。計算には10月1日時点の学習済みモデルを使っています。要因を1つずつ足していくので、内訳の合計は必ず最後の勝率と一致します。</figcaption>
     </figure>
   </header>
 
   <nav class="toc" id="toc" aria-label="目次">
     <span class="label">目次</span>
     <ol>
-      <li><a href="#problem"><span>01</span>作ろうと思ったきっかけ</a></li>
-      <li><a href="#approach"><span>02</span>3つの方針</a></li>
-      <li><a href="#how"><span>03</span>仕組み</a></li>
-      <li><a href="#accuracy"><span>04</span>精度の記録</a></li>
-      <li><a href="#craft"><span>05</span>工夫したところ</a></li>
-      <li><a href="#screens"><span>06</span>画面と機能</a></li>
-      <li><a href="#tech"><span>07</span>技術と構成</a></li>
-      <li><a href="#process"><span>08</span>開発の進め方</a></li>
-      <li><a href="#log"><span>09</span>制作の記録</a></li>
-      <li><a href="#learned"><span>10</span>学んだこと・変わったこと</a></li>
-      <li><a href="#next"><span>11</span>これから</a></li>
+      <li><a href="#about"><span>01</span>VALORANT とは</a></li>
+      <li><a href="#problem"><span>02</span>作ろうと思ったきっかけ</a></li>
+      <li><a href="#approach"><span>03</span>3つの方針</a></li>
+      <li><a href="#how"><span>04</span>仕組み</a></li>
+      <li><a href="#accuracy"><span>05</span>精度の記録</a></li>
+      <li><a href="#craft"><span>06</span>工夫したところ</a></li>
+      <li><a href="#screens"><span>07</span>画面と機能</a></li>
+      <li><a href="#tech"><span>08</span>技術と構成</a></li>
+      <li><a href="#process"><span>09</span>開発の進め方</a></li>
+      <li><a href="#log"><span>10</span>制作の記録</a></li>
+      <li><a href="#learned"><span>11</span>学んだこと・変わったこと</a></li>
+      <li><a href="#next"><span>12</span>これから</a></li>
     </ol>
   </nav>
 
-  <section class="chapter" id="problem">
+  <section class="chapter" id="about">
     <header>
       <span class="label">01</span>
+      <h2>VALORANT とは</h2>
+      <a class="back" href="#toc">↑ 目次へ</a>
+    </header>
+    <div class="body">
+      <p>VALORANT（ヴァロラント）は、Riot Games が 2020 年に出した無料の対戦ゲームです。5 人ずつのチームで撃ち合う一人称視点のシューティングで、世界大会 VALORANT Champions Tour（VCT）が毎年開かれる、人気の e スポーツでもあります。</p>
+      <p>試合はラウンドの積み重ねです。片方が攻撃、もう片方が防衛になり、攻撃は爆弾（スパイク）を決まった場所に設置して爆発させるか、相手を全員倒せば勝ち。防衛は設置を防ぐか、設置されたスパイクを解除すれば勝ちです。前半と後半で攻守を入れ替え、先に 13 ラウンドを取ったチームが試合に勝ちます。</p>
+      <ul class="reads terms">
+        <li>ラウンド<span>1回の攻防。1ラウンドは約1分40秒で、倒された選手はそのラウンドの間は戻れない</span></li>
+        <li>スパイク<span>攻撃側が設置する爆弾。設置すると約45秒で爆発するので、防衛は解除を急ぐ</span></li>
+        <li>お金と装備<span>ラウンドごとに稼いだお金で武器やシールドを買う。節約する回を「エコ」、全員がしっかり買う回を「フルバイ」と呼ぶ</span></li>
+        <li>エージェント<span>選べるキャラクター。それぞれ煙や索敵などのスキルと、たまると使える必殺技（アルティメット）を持つ</span></li>
+        <li>ミニマップ<span>画面の隅の小さな地図。味方と、見えている相手の位置が顔アイコンで出る</span></li>
+        <li>トレード<span>味方が倒された直後に、倒した相手をすぐ倒し返すこと。できないと人数で不利になる</span></li>
+      </ul>
+      <p>人数・お金・時間・位置が刻々と変わるので、同じ撃ち合いでも、どの状況で起きたかで勝ちやすさが大きく違います。このソフトは、その状況を映像から読み取って数字にします。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="problem">
+    <header>
+      <span class="label">02</span>
       <h2>作ろうと思ったきっかけ</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
     <div class="body">
       <p>e スポーツにはまっていて、ゲームをただプレイするだけでなく、知識を活かして上手くなる方法はないかと考えていました。そこで思いついたのが、データを使った解析で自分の行動を振り返り、改善していくことです。</p>
-      <p>VALORANT は 5 対 5 で攻撃と防衛に分かれ、先に 13 ラウンドを取ったチームが勝つゲームです。戦績サイトではキル数や勝敗は分かりますが、ラウンドの中の「どの瞬間に、なぜ不利になったか」は、自分でリプレイを見返して考えるしかありません。そのため最初から、試合の映像そのものから人数や時間を読み取り、場面ごとの勝率を出すことを目指しました。</p>
+      <p>戦績サイトではキル数や勝敗は分かりますが、ラウンドの中の「どの瞬間に、なぜ不利になったか」は、自分でリプレイを見返して考えるしかありません。そのため最初から、試合の映像そのものから人数や時間を読み取り、場面ごとの勝率を出すことを目指しました。</p>
       <div class="pivot">
         <div><span class="label">戦績サイトで分かること</span><b>試合ごとの成績</b><span>キル数・ダメージ・勝敗などの合計</span></div>
         <div class="to" aria-hidden="true">→</div>
@@ -354,7 +412,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="approach">
     <header>
-      <span class="label">02</span>
+      <span class="label">03</span>
       <h2>3つの方針</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -378,7 +436,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="how">
     <header>
-      <span class="label">03</span>
+      <span class="label">04</span>
       <h2>仕組み</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -464,7 +522,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="accuracy">
     <header>
-      <span class="label">04</span>
+      <span class="label">05</span>
       <h2>精度の記録</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -495,7 +553,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="craft">
     <header>
-      <span class="label">05</span>
+      <span class="label">06</span>
       <h2>工夫したところ</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -547,7 +605,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="screens">
     <header>
-      <span class="label">06</span>
+      <span class="label">07</span>
       <h2>画面と機能</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -640,7 +698,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="tech">
     <header>
-      <span class="label">07</span>
+      <span class="label">08</span>
       <h2>技術と構成</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -667,7 +725,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="process">
     <header>
-      <span class="label">08</span>
+      <span class="label">09</span>
       <h2>開発の進め方</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -698,7 +756,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="log">
     <header>
-      <span class="label">09</span>
+      <span class="label">10</span>
       <h2>制作の記録</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -725,7 +783,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="learned">
     <header>
-      <span class="label">10</span>
+      <span class="label">11</span>
       <h2>学んだこと・変わったこと</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
@@ -746,7 +804,7 @@ a:focus-visible { outline: 2px solid var(--def); outline-offset: 2px; }
 
   <section class="chapter" id="next">
     <header>
-      <span class="label">11</span>
+      <span class="label">12</span>
       <h2>これから</h2>
       <a class="back" href="#toc">↑ 目次へ</a>
     </header>
